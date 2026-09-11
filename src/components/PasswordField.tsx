@@ -10,8 +10,8 @@ type PasswordFieldProps = {
   onChange: (value: string) => void;
   autoComplete?: string;
   minLength?: number;
-  hint?: string;
-  error?: string | null;
+  hint?: string | undefined;
+  error?: string | null | undefined;
 };
 
 /** Password input with a show/hide eye toggle, matching the site's field styling. */
