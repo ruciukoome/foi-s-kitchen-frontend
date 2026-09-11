@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { toast } from "sonner";
 
+import { EmailField } from "@/components/EmailField";
+import { FormAlert } from "@/components/FormAlert";
 import { PageHeadingRow } from "@/components/PageHeadingRow";
 import { useAuth } from "@/lib/auth";
-import { fieldClass, primaryButtonClass } from "@/lib/ui";
+import { mapAuthError, unavailableError, type AuthFieldErrors } from "@/lib/auth-errors";
+import { primaryButtonClass } from "@/lib/ui";
 
 export const Route = createFileRoute("/forgot-password")({
   ssr: false,
@@ -30,11 +32,17 @@ function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [errors, setErrors] = useState<AuthFieldErrors>({});
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setErrors({});
     if (!client) {
-      toast.error("Accounts aren't available right now. Please try again shortly.");
+      setErrors(unavailableError);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrors({ email: "Please enter a valid email address." });
       return;
     }
     setBusy(true);
@@ -45,11 +53,12 @@ function ForgotPasswordPage() {
       if (error) throw error;
       setSent(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong.");
+      setErrors(mapAuthError(error, "recover"));
     } finally {
       setBusy(false);
     }
   }
+
 
   return (
     <section className="container-page max-w-md pb-16 md:pb-24">
