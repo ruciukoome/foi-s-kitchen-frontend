@@ -77,15 +77,6 @@ function OrderPage() {
             We've opened WhatsApp with your order. Send the message and we'll confirm
             the total and delivery time right away.
           </p>
-          {wasSignedIn && (
-            <p className="mt-3 text-sm text-muted-foreground">
-              Track this order anytime under{" "}
-              <Link to="/account/orders" className="font-semibold text-primary hover:underline">
-                My Orders
-              </Link>
-              .
-            </p>
-          )}
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
