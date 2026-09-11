@@ -255,3 +255,108 @@ function MobileLink({
     </Link>
   );
 }
+
+/** Account icon: links to sign-in when signed out, click-only menu when signed in. */
+function AccountMenu() {
+  const { user, profile, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(event: PointerEvent) {
+      if (!wrapRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  if (!user) {
+    return (
+      <Link
+        to="/sign-in"
+        aria-label="Sign in"
+        className="grid h-11 w-11 place-items-center rounded-full transition-colors duration-200 ease-out hover:bg-background/10 hover:text-primary"
+      >
+        <User className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+      </Link>
+    );
+  }
+
+  const label = initials(profile?.full_name ?? user.email);
+
+  return (
+    <div className="relative" ref={wrapRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-controls={panelId}
+        aria-label="Account menu"
+        className="grid h-11 w-11 place-items-center rounded-full border border-gold/50 font-display text-sm font-semibold transition-colors duration-200 ease-out hover:border-primary hover:text-primary"
+      >
+        {label}
+      </button>
+
+      {open && (
+        <div
+          id={panelId}
+          role="menu"
+          className="animate-fade-up absolute top-full right-0 w-56 rounded-xl border border-border bg-card p-2 text-card-foreground shadow-lift"
+        >
+          <Link
+            role="menuitem"
+            to="/account"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-3 text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+          >
+            My Account
+          </Link>
+          <Link
+            role="menuitem"
+            to="/account/orders"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-3 text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+          >
+            My Orders
+          </Link>
+          {profile?.is_admin && (
+            <Link
+              role="menuitem"
+              to="/admin/orders"
+              onClick={() => setOpen(false)}
+              className="block rounded-lg px-3 py-3 text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+            >
+              Manage Orders
+            </Link>
+          )}
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              void signOut();
+            }}
+            className="block w-full rounded-lg px-3 py-3 text-left text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+          >
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
