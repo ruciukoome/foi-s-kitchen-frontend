@@ -20,6 +20,7 @@ const orderLinks = [
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { count, bump } = useCart();
+  const { user, profile, signOut } = useAuth();
   const [bumping, setBumping] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -103,6 +104,25 @@ export function SiteHeader() {
             <MobileLink to="/contact" label="Contact" />
             <MobileLink to="/order" label="Order Online" />
             <MobileLink to="/quote" label="Request a Quotation" />
+
+            <span className="my-2 h-px bg-gold/40" />
+
+            {user ? (
+              <>
+                <MobileLink to="/account" label="My Account" />
+                <MobileLink to="/account/orders" label="My Orders" />
+                {profile?.is_admin && <MobileLink to="/admin/orders" label="Manage Orders" />}
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="flex min-h-[48px] items-center font-display text-base font-semibold text-left transition-colors duration-200 ease-out hover:text-primary"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <MobileLink to="/sign-in" label="Sign In" />
+            )}
           </nav>
         </div>
       )}
