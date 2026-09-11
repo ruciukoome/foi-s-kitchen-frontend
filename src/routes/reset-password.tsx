@@ -95,13 +95,18 @@ function ResetPasswordPage() {
             </Link>
           </div>
         ) : (
-          <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+          <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+            <FormAlert message={errors.form} />
             <PasswordField
               id="rp-password"
               label="New password"
               value={password}
-              onChange={setPassword}
+              onChange={(v) => {
+                setPassword(v);
+                if (errors.password || errors.form) setErrors({});
+              }}
               autoComplete="new-password"
+              error={errors.password}
               hint={
                 password.length === 0
                   ? "Use at least 6 characters."
@@ -116,8 +121,9 @@ function ResetPasswordPage() {
               value={confirmPassword}
               onChange={setConfirmPassword}
               autoComplete="new-password"
-              error={mismatch ? "Those passwords don't match." : null}
+              error={mismatch ? "Those passwords don't match." : errors.confirmPassword}
             />
+
             <button
               type="submit"
               disabled={busy || mismatch || !session}
