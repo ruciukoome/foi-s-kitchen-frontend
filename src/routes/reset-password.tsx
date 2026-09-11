@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
+import { FormAlert } from "@/components/FormAlert";
 import { PageHeadingRow } from "@/components/PageHeadingRow";
 import { PasswordField } from "@/components/PasswordField";
 import { useAuth } from "@/lib/auth";
+import { mapAuthError, unavailableError, type AuthFieldErrors } from "@/lib/auth-errors";
 import { primaryButtonClass } from "@/lib/ui";
+
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
