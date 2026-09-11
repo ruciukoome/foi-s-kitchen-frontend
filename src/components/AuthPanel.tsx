@@ -3,9 +3,12 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import logo from "@/assets/logo.png";
+import { EmailField } from "@/components/EmailField";
+import { FormAlert } from "@/components/FormAlert";
 import { PasswordField } from "@/components/PasswordField";
 import { useAuth } from "@/lib/auth";
-import { fieldClass, primaryButtonClass } from "@/lib/ui";
+import { mapAuthError, unavailableError, type AuthFieldErrors } from "@/lib/auth-errors";
+import { primaryButtonClass } from "@/lib/ui";
 
 export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const { client } = useAuth();
@@ -15,6 +18,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
+  const [errors, setErrors] = useState<AuthFieldErrors>({});
 
   const isSignUp = mode === "sign-up";
   const mismatch = isSignUp && confirmPassword.length > 0 && confirmPassword !== password;
@@ -32,12 +36,13 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setErrors({});
     if (!client) {
-      toast.error("Accounts aren't available right now. Please try again shortly.");
+      setErrors(unavailableError);
       return;
     }
     if (isSignUp && password !== confirmPassword) {
-      toast.error("Those passwords don't match.");
+      setErrors({ confirmPassword: "Those passwords don't match." });
       return;
     }
     setBusy(true);
@@ -62,23 +67,25 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
         await routeByRole(data.user.id);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong.");
+      setErrors(mapAuthError(error, isSignUp ? "sign-up" : "sign-in"));
     } finally {
       setBusy(false);
     }
   }
 
   async function onGoogle() {
+    setErrors({});
     if (!client) {
-      toast.error("Accounts aren't available right now. Please try again shortly.");
+      setErrors(unavailableError);
       return;
     }
     const { error } = await client.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-    if (error) toast.error(error.message);
+    if (error) setErrors(mapAuthError(error, isSignUp ? "sign-up" : "sign-in"));
   }
+
 
   if (sentConfirmation) {
     return (
