@@ -35,10 +35,8 @@ const fieldClass =
 
 function OrderPage() {
   const { lines, total, setQty, remove, clear } = useCart();
-  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
-  const [wasSignedIn, setWasSignedIn] = useState(false);
   const [details, setDetails] = useState({
     name: "",
     phone: "",
@@ -48,45 +46,7 @@ function OrderPage() {
     notes: "",
   });
 
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    supabase
-      .from("profiles")
-      .select("full_name, phone, default_address, default_method")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active || !data) return;
-        setDetails((d) => ({
-          ...d,
-          name: d.name || data.full_name || "",
-          phone: d.phone || data.phone || "",
-          address: d.address || data.default_address || "",
-          method: data.default_method || d.method,
-        }));
-      });
-    return () => {
-      active = false;
-    };
-  }, [user]);
-
-  async function saveOrder() {
-    setWasSignedIn(Boolean(user));
-    const payload = {
-      user_id: user?.id ?? null,
-      guest_name: user ? null : details.name,
-      guest_phone: user ? null : details.phone,
-      items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
-      total,
-      method: details.method,
-      address: details.method === "Delivery" ? details.address || null : null,
-      preferred_time: details.time || null,
-      notes: details.notes || null,
-      status: "Received",
-    };
-    const { error } = await supabase.from("orders").insert(payload);
-    if (error) toast.error("We couldn't save your order, but WhatsApp is still open.");
+  function saveOrder() {
     setDone(true);
   }
 
