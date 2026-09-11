@@ -1,0 +1,106 @@
+import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
+
+import { PageHeadingRow } from "@/components/PageHeadingRow";
+import { useAuth } from "@/lib/auth";
+import { fieldClass, primaryButtonClass } from "@/lib/ui";
+
+export const Route = createFileRoute("/forgot-password")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Reset Your Password — Foi's Kitchen Nairobi" },
+      {
+        name: "description",
+        content:
+          "Forgot your Foi's Kitchen password? Enter your email and we'll send you a secure link to set a new one.",
+      },
+      { property: "og:title", content: "Reset Your Password — Foi's Kitchen" },
+      { property: "og:description", content: "We'll email you a secure password reset link." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: ForgotPasswordPage,
+});
+
+function ForgotPasswordPage() {
+  const { client } = useAuth();
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!client) {
+      toast.error("Accounts aren't available right now. Please try again shortly.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await client.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="container-page max-w-md pb-16 md:pb-24">
+      <PageHeadingRow title="Forgot password" note="We'll email you a link to set a new one." />
+
+      <div className="rounded-3xl border border-gold/40 bg-card p-6 shadow-card md:p-8">
+        {sent ? (
+          <div className="text-center">
+            <h2 className="font-display text-xl font-bold">Check your email</h2>
+            <p className="mt-3 text-muted-foreground">
+              If an account exists for{" "}
+              <strong className="text-foreground">{email}</strong>, a password reset link is on its
+              way. The link expires after a short while.
+            </p>
+            <Link
+              to="/sign-in"
+              className="mt-6 inline-block text-sm font-semibold text-primary hover:underline"
+            >
+              Back to sign in
+            </Link>
+          </div>
+        ) : (
+          <>
+            <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="fp-email" className="label-caps text-xs">
+                  Email
+                </label>
+                <input
+                  id="fp-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className={fieldClass}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <button type="submit" disabled={busy} className={`${primaryButtonClass} w-full`}>
+                Send reset link
+              </button>
+            </form>
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Remembered it?{" "}
+              <Link to="/sign-in" className="font-semibold text-primary hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
