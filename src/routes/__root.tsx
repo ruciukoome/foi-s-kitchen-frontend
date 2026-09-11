@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart";
+import { AuthProvider } from "@/lib/auth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { WhatsAppFloatButton } from "@/components/WhatsAppFloatButton";
@@ -129,6 +130,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <CartProvider>
         <div className="flex min-h-screen flex-col pb-20 md:pb-0">
           <SiteHeader />
@@ -142,6 +144,7 @@ function RootComponent() {
         <StickyOrderBar />
         <Toaster position="top-center" />
       </CartProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

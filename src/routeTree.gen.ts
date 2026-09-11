@@ -20,6 +20,8 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
+import { Route as AccountOrdersRouteImport } from './routes/account.orders'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as ApiPublicSupabaseStatusRouteImport } from './routes/api/public/supabase-status'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +79,16 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/account/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountOrdersRoute = AccountOrdersRouteImport.update({
+  id: '/account/orders',
+  path: '/account/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSupabaseStatusRoute = ApiPublicSupabaseStatusRouteImport.update({
   id: '/api/public/supabase-status',
   path: '/api/public/supabase-status',
@@ -94,6 +106,8 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/account/orders': typeof AccountOrdersRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/account/': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
@@ -108,6 +122,8 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/account/orders': typeof AccountOrdersRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/account': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
@@ -123,6 +139,8 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/account/orders': typeof AccountOrdersRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/account/': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
@@ -139,6 +157,8 @@ export interface FileRouteTypes {
     | '/services'
     | '/sign-in'
     | '/sign-up'
+    | '/account/orders'
+    | '/admin/orders'
     | '/account/'
     | '/api/public/supabase-status'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +173,8 @@ export interface FileRouteTypes {
     | '/services'
     | '/sign-in'
     | '/sign-up'
+    | '/account/orders'
+    | '/admin/orders'
     | '/account'
     | '/api/public/supabase-status'
   id:
@@ -167,6 +189,8 @@ export interface FileRouteTypes {
     | '/services'
     | '/sign-in'
     | '/sign-up'
+    | '/account/orders'
+    | '/admin/orders'
     | '/account/'
     | '/api/public/supabase-status'
   fileRoutesById: FileRoutesById
@@ -182,6 +206,8 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  AccountOrdersRoute: typeof AccountOrdersRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   AccountIndexRoute: typeof AccountIndexRoute
   ApiPublicSupabaseStatusRoute: typeof ApiPublicSupabaseStatusRoute
 }
@@ -265,6 +291,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/orders': {
+      id: '/account/orders'
+      path: '/account/orders'
+      fullPath: '/account/orders'
+      preLoaderRoute: typeof AccountOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/supabase-status': {
       id: '/api/public/supabase-status'
       path: '/api/public/supabase-status'
@@ -286,6 +326,8 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  AccountOrdersRoute: AccountOrdersRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   AccountIndexRoute: AccountIndexRoute,
   ApiPublicSupabaseStatusRoute: ApiPublicSupabaseStatusRoute,
 }
