@@ -41,10 +41,23 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
       setErrors(unavailableError);
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrors({ email: "Please enter a valid email address." });
+      return;
+    }
+    if (password.length === 0) {
+      setErrors({ password: "Please enter your password." });
+      return;
+    }
+    if (isSignUp && password.length < 6) {
+      setErrors({ password: "Use at least 6 characters." });
+      return;
+    }
     if (isSignUp && password !== confirmPassword) {
       setErrors({ confirmPassword: "Those passwords don't match." });
       return;
     }
+
     setBusy(true);
     try {
       if (isSignUp) {
