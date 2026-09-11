@@ -6,8 +6,6 @@ import { PageHero } from "@/components/PageHero";
 import { useCart } from "@/lib/cart";
 import { currency, site, waLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
 
 
 export const Route = createFileRoute("/order")({
