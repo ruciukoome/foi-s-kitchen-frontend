@@ -18,14 +18,18 @@ export const Route = createFileRoute("/api/public/supabase-status")({
         }
 
         try {
-          const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/`, {
-            headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
-          });
+          // New-format publishable keys (sb_publishable_...) are not JWTs and must
+          // be sent as `apikey` only — a Bearer header makes PostgREST reject them.
+          const isJwt = anonKey.split(".").length === 3;
+          const headers: Record<string, string> = { apikey: anonKey };
+          if (isJwt) headers["Authorization"] = `Bearer ${anonKey}`;
+          const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/`, { headers });
           return Response.json({
             configured: true,
             hasServiceRoleKey,
             ok: res.ok,
             status: res.status,
+            ...(res.ok ? {} : { detail: (await res.text()).slice(0, 300) }),
           });
         } catch (error) {
           return Response.json({
