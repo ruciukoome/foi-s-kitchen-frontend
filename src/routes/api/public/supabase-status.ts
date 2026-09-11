@@ -23,7 +23,8 @@ export const Route = createFileRoute("/api/public/supabase-status")({
           const isJwt = anonKey.split(".").length === 3;
           const headers: Record<string, string> = { apikey: anonKey };
           if (isJwt) headers["Authorization"] = `Bearer ${anonKey}`;
-          const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/`, { headers });
+          // /auth/v1/health accepts the anon/publishable key; /rest/v1/ root is service_role only.
+          const res = await fetch(`${url.replace(/\/$/, "")}/auth/v1/health`, { headers });
           return Response.json({
             configured: true,
             hasServiceRoleKey,
