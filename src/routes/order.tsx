@@ -342,7 +342,7 @@ function OrderPage() {
                 href={waLink(orderText)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => void saveOrder()}
+                onClick={() => saveOrder()}
                 className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-whatsapp px-6 text-whatsapp-foreground transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.97]"
               >
                 Complete via WhatsApp
