@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Minus, Plus, Smartphone, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHero } from "@/components/PageHero";
+import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { currency, site, waLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -33,8 +34,10 @@ const fieldClass =
 
 function OrderPage() {
   const { lines, total, setQty, remove, clear } = useCart();
+  const { client, user, profile } = useAuth();
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
   const [details, setDetails] = useState({
     name: "",
     phone: "",
@@ -44,9 +47,41 @@ function OrderPage() {
     notes: "",
   });
 
-  function saveOrder() {
+  // Prefill from the signed-in customer's saved profile (still editable).
+  useEffect(() => {
+    if (prefilled || !profile) return;
+    setDetails((d) => ({
+      ...d,
+      name: d.name || profile.full_name || "",
+      phone: d.phone || profile.phone || "",
+      method: profile.default_method || d.method,
+      address: d.address || profile.default_address || "",
+    }));
+    setPrefilled(true);
+  }, [profile, prefilled]);
+
+  async function saveOrder() {
     setDone(true);
+    if (!client) return;
+    const { error } = await client.from("orders").insert({
+      user_id: user?.id ?? null,
+      guest_name: user ? null : details.name,
+      guest_phone: user ? null : details.phone,
+      items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+      total,
+      method: details.method,
+      address: details.method === "Delivery" ? details.address || null : null,
+      preferred_time: details.time || null,
+      notes: details.notes || null,
+      status: "Received",
+    });
+    if (error) {
+      console.error(error);
+      toast.error("We opened WhatsApp, but couldn't save the order for tracking.");
+    }
   }
+
+
 
 
   const orderText = [
@@ -75,6 +110,16 @@ function OrderPage() {
             We've opened WhatsApp with your order. Send the message and we'll confirm
             the total and delivery time right away.
           </p>
+
+          {user && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Track this order anytime under{" "}
+              <Link to="/account/orders" className="font-semibold text-primary hover:underline">
+                My Orders
+              </Link>
+              .
+            </p>
+          )}
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link

@@ -17,6 +17,11 @@ import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OrderRouteImport } from './routes/order'
 import { Route as QuoteRouteImport } from './routes/quote'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as AccountIndexRouteImport } from './routes/account.index'
+import { Route as AccountOrdersRouteImport } from './routes/account.orders'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as ApiPublicSupabaseStatusRouteImport } from './routes/api/public/supabase-status'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +64,31 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountOrdersRoute = AccountOrdersRouteImport.update({
+  id: '/account/orders',
+  path: '/account/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSupabaseStatusRoute = ApiPublicSupabaseStatusRouteImport.update({
   id: '/api/public/supabase-status',
   path: '/api/public/supabase-status',
@@ -74,6 +104,11 @@ export interface FileRoutesByFullPath {
   '/order': typeof OrderRoute
   '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/account/orders': typeof AccountOrdersRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/account/': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +120,11 @@ export interface FileRoutesByTo {
   '/order': typeof OrderRoute
   '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/account/orders': typeof AccountOrdersRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/account': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
 export interface FileRoutesById {
@@ -97,6 +137,11 @@ export interface FileRoutesById {
   '/order': typeof OrderRoute
   '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/account/orders': typeof AccountOrdersRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/account/': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +155,11 @@ export interface FileRouteTypes {
     | '/order'
     | '/quote'
     | '/services'
+    | '/sign-in'
+    | '/sign-up'
+    | '/account/orders'
+    | '/admin/orders'
+    | '/account/'
     | '/api/public/supabase-status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +171,11 @@ export interface FileRouteTypes {
     | '/order'
     | '/quote'
     | '/services'
+    | '/sign-in'
+    | '/sign-up'
+    | '/account/orders'
+    | '/admin/orders'
+    | '/account'
     | '/api/public/supabase-status'
   id:
     | '__root__'
@@ -132,6 +187,11 @@ export interface FileRouteTypes {
     | '/order'
     | '/quote'
     | '/services'
+    | '/sign-in'
+    | '/sign-up'
+    | '/account/orders'
+    | '/admin/orders'
+    | '/account/'
     | '/api/public/supabase-status'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +204,11 @@ export interface RootRouteChildren {
   OrderRoute: typeof OrderRoute
   QuoteRoute: typeof QuoteRoute
   ServicesRoute: typeof ServicesRoute
+  SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
+  AccountOrdersRoute: typeof AccountOrdersRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AccountIndexRoute: typeof AccountIndexRoute
   ApiPublicSupabaseStatusRoute: typeof ApiPublicSupabaseStatusRoute
 }
 
@@ -205,6 +270,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/orders': {
+      id: '/account/orders'
+      path: '/account/orders'
+      fullPath: '/account/orders'
+      preLoaderRoute: typeof AccountOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/supabase-status': {
       id: '/api/public/supabase-status'
       path: '/api/public/supabase-status'
@@ -224,6 +324,11 @@ const rootRouteChildren: RootRouteChildren = {
   OrderRoute: OrderRoute,
   QuoteRoute: QuoteRoute,
   ServicesRoute: ServicesRoute,
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
+  AccountOrdersRoute: AccountOrdersRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AccountIndexRoute: AccountIndexRoute,
   ApiPublicSupabaseStatusRoute: ApiPublicSupabaseStatusRoute,
 }
 export const routeTree = rootRouteImport

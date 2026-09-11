@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronDown, Menu, ShoppingBag, X } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { initials, useAuth } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
@@ -19,6 +20,7 @@ const orderLinks = [
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { count, bump } = useCart();
+  const { user, profile, signOut } = useAuth();
   const [bumping, setBumping] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -70,6 +72,8 @@ export function SiteHeader() {
               </span>
             )}
           </Link>
+
+          <AccountMenu />
         </nav>
 
         {/* Mobile trigger */}
@@ -100,6 +104,25 @@ export function SiteHeader() {
             <MobileLink to="/contact" label="Contact" />
             <MobileLink to="/order" label="Order Online" />
             <MobileLink to="/quote" label="Request a Quotation" />
+
+            <span className="my-2 h-px bg-gold/40" />
+
+            {user ? (
+              <>
+                <MobileLink to="/account" label="My Account" />
+                <MobileLink to="/account/orders" label="My Orders" />
+                {profile?.is_admin && <MobileLink to="/admin/orders" label="Manage Orders" />}
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="flex min-h-[48px] items-center font-display text-base font-semibold text-left transition-colors duration-200 ease-out hover:text-primary"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <MobileLink to="/sign-in" label="Sign In" />
+            )}
           </nav>
         </div>
       )}
@@ -230,5 +253,110 @@ function MobileLink({
     >
       {label}
     </Link>
+  );
+}
+
+/** Account icon: links to sign-in when signed out, click-only menu when signed in. */
+function AccountMenu() {
+  const { user, profile, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(event: PointerEvent) {
+      if (!wrapRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  if (!user) {
+    return (
+      <Link
+        to="/sign-in"
+        aria-label="Sign in"
+        className="grid h-11 w-11 place-items-center rounded-full transition-colors duration-200 ease-out hover:bg-background/10 hover:text-primary"
+      >
+        <User className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+      </Link>
+    );
+  }
+
+  const label = initials(profile?.full_name ?? user.email);
+
+  return (
+    <div className="relative" ref={wrapRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-controls={panelId}
+        aria-label="Account menu"
+        className="grid h-11 w-11 place-items-center rounded-full border border-gold/50 font-display text-sm font-semibold transition-colors duration-200 ease-out hover:border-primary hover:text-primary"
+      >
+        {label}
+      </button>
+
+      {open && (
+        <div
+          id={panelId}
+          role="menu"
+          className="animate-fade-up absolute top-full right-0 w-56 rounded-xl border border-border bg-card p-2 text-card-foreground shadow-lift"
+        >
+          <Link
+            role="menuitem"
+            to="/account"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-3 text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+          >
+            My Account
+          </Link>
+          <Link
+            role="menuitem"
+            to="/account/orders"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-3 text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+          >
+            My Orders
+          </Link>
+          {profile?.is_admin && (
+            <Link
+              role="menuitem"
+              to="/admin/orders"
+              onClick={() => setOpen(false)}
+              className="block rounded-lg px-3 py-3 text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+            >
+              Manage Orders
+            </Link>
+          )}
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              void signOut();
+            }}
+            className="block w-full rounded-lg px-3 py-3 text-left text-sm transition-colors duration-200 ease-out hover:bg-secondary hover:text-primary"
+          >
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
