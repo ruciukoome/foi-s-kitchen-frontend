@@ -114,28 +114,29 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
       </div>
 
       <div className="p-6 md:p-8">
-        <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="a-email" className="label-caps text-xs">
-              Email
-            </label>
-            <input
-              id="a-email"
-              type="email"
-              autoComplete="email"
-              required
-              className={fieldClass}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+        <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+          <FormAlert message={errors.form} />
+
+          <EmailField
+            id="a-email"
+            value={email}
+            onChange={(v) => {
+              setEmail(v);
+              if (errors.email || errors.form) setErrors({});
+            }}
+            error={errors.email}
+          />
 
           <PasswordField
             id="a-password"
             label="Password"
             value={password}
-            onChange={setPassword}
+            onChange={(v) => {
+              setPassword(v);
+              if (errors.password || errors.form) setErrors({});
+            }}
             autoComplete={isSignUp ? "new-password" : "current-password"}
+            error={errors.password}
             hint={
               isSignUp
                 ? password.length === 0
@@ -154,9 +155,10 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
               value={confirmPassword}
               onChange={setConfirmPassword}
               autoComplete="new-password"
-              error={mismatch ? "Those passwords don't match." : null}
+              error={mismatch ? "Those passwords don't match." : errors.confirmPassword}
             />
           ) : null}
+
 
           {!isSignUp ? (
             <div className="-mt-1 text-right">
