@@ -82,21 +82,18 @@ function ForgotPasswordPage() {
           </div>
         ) : (
           <>
-            <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="fp-email" className="label-caps text-xs">
-                  Email
-                </label>
-                <input
-                  id="fp-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className={fieldClass}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+            <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+              <FormAlert message={errors.form} />
+              <EmailField
+                id="fp-email"
+                value={email}
+                onChange={(v) => {
+                  setEmail(v);
+                  if (errors.email || errors.form) setErrors({});
+                }}
+                error={errors.email}
+              />
+
               <button type="submit" disabled={busy} className={`${primaryButtonClass} w-full`}>
                 Send reset link
               </button>
