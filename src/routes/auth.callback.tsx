@@ -32,6 +32,7 @@ function AuthCallbackPage() {
     }
     if (profile.is_admin) void navigate({ to: "/admin/orders", replace: true });
     else void navigate({ to: "/", replace: true });
+    return undefined;
   }, [user, profile, loading, navigate]);
 
   return (
