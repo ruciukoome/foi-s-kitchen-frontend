@@ -23,7 +23,7 @@ function AuthCallbackPage() {
     if (loading) return undefined;
     if (!user) {
       void navigate({ to: "/sign-in", replace: true });
-      return;
+      return undefined;
     }
     // Profile may still be loading; wait briefly, then fall back to home.
     if (profile === null) {
