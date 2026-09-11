@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronDown, Menu, ShoppingBag, X } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { initials, useAuth } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
@@ -70,6 +71,8 @@ export function SiteHeader() {
               </span>
             )}
           </Link>
+
+          <AccountMenu />
         </nav>
 
         {/* Mobile trigger */}
