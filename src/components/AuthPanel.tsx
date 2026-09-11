@@ -38,7 +38,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
         const { data, error } = await client.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/account` },
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
         });
         if (error) throw error;
         if (!data.session) {

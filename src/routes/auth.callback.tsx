@@ -25,8 +25,11 @@ function AuthCallbackPage() {
       void navigate({ to: "/sign-in", replace: true });
       return;
     }
-    // Profile may still be loading; wait for it before deciding.
-    if (profile === null) return;
+    // Profile may still be loading; wait briefly, then fall back to home.
+    if (profile === null) {
+      const fallback = setTimeout(() => void navigate({ to: "/", replace: true }), 4000);
+      return () => clearTimeout(fallback);
+    }
     if (profile.is_admin) void navigate({ to: "/admin/orders", replace: true });
     else void navigate({ to: "/", replace: true });
   }, [user, profile, loading, navigate]);
