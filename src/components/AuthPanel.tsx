@@ -15,6 +15,17 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
 
   const isSignUp = mode === "sign-up";
 
+  async function routeByRole(userId: string) {
+    if (!client) return navigate({ to: "/" });
+    const { data } = await client
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", userId)
+      .maybeSingle();
+    if (data?.is_admin) return navigate({ to: "/admin/orders" });
+    return navigate({ to: "/" });
+  }
+
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!client) {
@@ -34,13 +45,13 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
           setSentConfirmation(true);
           return;
         }
-        toast.success("Welcome! Add your name and phone to speed up ordering.");
-        void navigate({ to: "/account" });
+        toast.success("Welcome! Add your name and phone anytime from My Account.");
+        await routeByRole(data.session.user.id);
       } else {
-        const { error } = await client.auth.signInWithPassword({ email, password });
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Signed in.");
-        void navigate({ to: "/account" });
+        await routeByRole(data.user.id);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong.");
