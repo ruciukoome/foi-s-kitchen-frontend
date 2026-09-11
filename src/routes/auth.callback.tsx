@@ -19,8 +19,8 @@ function AuthCallbackPage() {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (loading) return;
+  useEffect((): (() => void) | undefined => {
+    if (loading) return undefined;
     if (!user) {
       void navigate({ to: "/sign-in", replace: true });
       return;
