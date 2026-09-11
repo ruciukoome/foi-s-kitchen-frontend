@@ -31,7 +31,11 @@ const diets: Diet[] = ["Vegetarian", "Vegan", "High protein", "Gluten free"];
 
 function MenuPage() {
   const { category } = Route.useSearch();
-  const [active, setActive] = useState<Category>(category ?? categories[0]);
+  const navigate = useNavigate({ from: "/menu" });
+  // Category is driven entirely by the ?category= search param, never local state.
+  const active: Category = category ?? categories[0];
+  const setActive = (next: Category) =>
+    navigate({ search: (previous) => ({ ...previous, category: next }) });
   const [query, setQuery] = useState("");
   const [diet, setDiet] = useState<Diet | null>(null);
   const { count } = useCart();
