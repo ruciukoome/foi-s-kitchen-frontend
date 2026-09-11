@@ -67,7 +67,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
     }
     const { error } = await client.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/account` },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
     if (error) toast.error(error.message);
   }
