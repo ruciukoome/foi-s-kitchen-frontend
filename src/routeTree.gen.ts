@@ -22,6 +22,7 @@ import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiPublicSupabaseStatusRouteImport } from './routes/api/public/supabase-status'
 
 const IndexRoute = IndexRouteImport.update({
@@ -89,6 +90,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
   path: '/admin/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSupabaseStatusRoute = ApiPublicSupabaseStatusRouteImport.update({
   id: '/api/public/supabase-status',
   path: '/api/public/supabase-status',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/account/': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/account': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/account/': typeof AccountIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/account/orders'
     | '/admin/orders'
+    | '/auth/callback'
     | '/account/'
     | '/api/public/supabase-status'
   fileRoutesByTo: FileRoutesByTo
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/account/orders'
     | '/admin/orders'
+    | '/auth/callback'
     | '/account'
     | '/api/public/supabase-status'
   id:
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/account/orders'
     | '/admin/orders'
+    | '/auth/callback'
     | '/account/'
     | '/api/public/supabase-status'
   fileRoutesById: FileRoutesById
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   AccountOrdersRoute: typeof AccountOrdersRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   AccountIndexRoute: typeof AccountIndexRoute
   ApiPublicSupabaseStatusRoute: typeof ApiPublicSupabaseStatusRoute
 }
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/supabase-status': {
       id: '/api/public/supabase-status'
       path: '/api/public/supabase-status'
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   AccountOrdersRoute: AccountOrdersRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   AccountIndexRoute: AccountIndexRoute,
   ApiPublicSupabaseStatusRoute: ApiPublicSupabaseStatusRoute,
 }
