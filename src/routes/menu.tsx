@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Search, ShoppingBag } from "lucide-react";
 import { z } from "zod";
 import { CategoryTabs } from "@/components/CategoryTabs";
