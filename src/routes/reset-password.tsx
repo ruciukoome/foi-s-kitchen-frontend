@@ -36,6 +36,7 @@ function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [expired, setExpired] = useState(false);
+  const [errors, setErrors] = useState<AuthFieldErrors>({});
 
   const mismatch = confirmPassword.length > 0 && confirmPassword !== password;
 
@@ -48,12 +49,17 @@ function ResetPasswordPage() {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setErrors({});
     if (!client) {
-      toast.error("Accounts aren't available right now. Please try again shortly.");
+      setErrors(unavailableError);
+      return;
+    }
+    if (password.length < 6) {
+      setErrors({ password: "Use at least 6 characters." });
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Those passwords don't match.");
+      setErrors({ confirmPassword: "Those passwords don't match." });
       return;
     }
     setBusy(true);
@@ -63,11 +69,12 @@ function ResetPasswordPage() {
       toast.success("Password updated.");
       await navigate({ to: "/account", replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong.");
+      setErrors(mapAuthError(error, "reset"));
     } finally {
       setBusy(false);
     }
   }
+
 
   return (
     <section className="container-page max-w-md pb-16 md:pb-24">
