@@ -3,9 +3,12 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import logo from "@/assets/logo.png";
+import { EmailField } from "@/components/EmailField";
+import { FormAlert } from "@/components/FormAlert";
 import { PasswordField } from "@/components/PasswordField";
 import { useAuth } from "@/lib/auth";
-import { fieldClass, primaryButtonClass } from "@/lib/ui";
+import { mapAuthError, unavailableError, type AuthFieldErrors } from "@/lib/auth-errors";
+import { primaryButtonClass } from "@/lib/ui";
 
 export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const { client } = useAuth();
@@ -15,6 +18,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
+  const [errors, setErrors] = useState<AuthFieldErrors>({});
 
   const isSignUp = mode === "sign-up";
   const mismatch = isSignUp && confirmPassword.length > 0 && confirmPassword !== password;
@@ -32,14 +36,28 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setErrors({});
     if (!client) {
-      toast.error("Accounts aren't available right now. Please try again shortly.");
+      setErrors(unavailableError);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrors({ email: "Please enter a valid email address." });
+      return;
+    }
+    if (password.length === 0) {
+      setErrors({ password: "Please enter your password." });
+      return;
+    }
+    if (isSignUp && password.length < 6) {
+      setErrors({ password: "Use at least 6 characters." });
       return;
     }
     if (isSignUp && password !== confirmPassword) {
-      toast.error("Those passwords don't match.");
+      setErrors({ confirmPassword: "Those passwords don't match." });
       return;
     }
+
     setBusy(true);
     try {
       if (isSignUp) {
@@ -62,23 +80,25 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
         await routeByRole(data.user.id);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong.");
+      setErrors(mapAuthError(error, isSignUp ? "sign-up" : "sign-in"));
     } finally {
       setBusy(false);
     }
   }
 
   async function onGoogle() {
+    setErrors({});
     if (!client) {
-      toast.error("Accounts aren't available right now. Please try again shortly.");
+      setErrors(unavailableError);
       return;
     }
     const { error } = await client.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-    if (error) toast.error(error.message);
+    if (error) setErrors(mapAuthError(error, isSignUp ? "sign-up" : "sign-in"));
   }
+
 
   if (sentConfirmation) {
     return (
@@ -107,28 +127,29 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
       </div>
 
       <div className="p-6 md:p-8">
-        <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="a-email" className="label-caps text-xs">
-              Email
-            </label>
-            <input
-              id="a-email"
-              type="email"
-              autoComplete="email"
-              required
-              className={fieldClass}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+        <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+          <FormAlert message={errors.form} />
+
+          <EmailField
+            id="a-email"
+            value={email}
+            onChange={(v) => {
+              setEmail(v);
+              if (errors.email || errors.form) setErrors({});
+            }}
+            error={errors.email}
+          />
 
           <PasswordField
             id="a-password"
             label="Password"
             value={password}
-            onChange={setPassword}
+            onChange={(v) => {
+              setPassword(v);
+              if (errors.password || errors.form) setErrors({});
+            }}
             autoComplete={isSignUp ? "new-password" : "current-password"}
+            error={errors.password}
             hint={
               isSignUp
                 ? password.length === 0
@@ -147,9 +168,10 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
               value={confirmPassword}
               onChange={setConfirmPassword}
               autoComplete="new-password"
-              error={mismatch ? "Those passwords don't match." : null}
+              error={mismatch ? "Those passwords don't match." : errors.confirmPassword}
             />
           ) : null}
+
 
           {!isSignUp ? (
             <div className="-mt-1 text-right">

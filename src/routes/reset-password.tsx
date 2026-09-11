@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
+import { FormAlert } from "@/components/FormAlert";
 import { PageHeadingRow } from "@/components/PageHeadingRow";
 import { PasswordField } from "@/components/PasswordField";
 import { useAuth } from "@/lib/auth";
+import { mapAuthError, unavailableError, type AuthFieldErrors } from "@/lib/auth-errors";
 import { primaryButtonClass } from "@/lib/ui";
+
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
@@ -33,6 +36,7 @@ function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [expired, setExpired] = useState(false);
+  const [errors, setErrors] = useState<AuthFieldErrors>({});
 
   const mismatch = confirmPassword.length > 0 && confirmPassword !== password;
 
@@ -45,12 +49,17 @@ function ResetPasswordPage() {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setErrors({});
     if (!client) {
-      toast.error("Accounts aren't available right now. Please try again shortly.");
+      setErrors(unavailableError);
+      return;
+    }
+    if (password.length < 6) {
+      setErrors({ password: "Use at least 6 characters." });
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Those passwords don't match.");
+      setErrors({ confirmPassword: "Those passwords don't match." });
       return;
     }
     setBusy(true);
@@ -60,11 +69,12 @@ function ResetPasswordPage() {
       toast.success("Password updated.");
       await navigate({ to: "/account", replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong.");
+      setErrors(mapAuthError(error, "reset"));
     } finally {
       setBusy(false);
     }
   }
+
 
   return (
     <section className="container-page max-w-md pb-16 md:pb-24">
@@ -85,13 +95,18 @@ function ResetPasswordPage() {
             </Link>
           </div>
         ) : (
-          <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+          <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+            <FormAlert message={errors.form} />
             <PasswordField
               id="rp-password"
               label="New password"
               value={password}
-              onChange={setPassword}
+              onChange={(v) => {
+                setPassword(v);
+                if (errors.password || errors.form) setErrors({});
+              }}
               autoComplete="new-password"
+              error={errors.password}
               hint={
                 password.length === 0
                   ? "Use at least 6 characters."
@@ -106,8 +121,9 @@ function ResetPasswordPage() {
               value={confirmPassword}
               onChange={setConfirmPassword}
               autoComplete="new-password"
-              error={mismatch ? "Those passwords don't match." : null}
+              error={mismatch ? "Those passwords don't match." : errors.confirmPassword}
             />
+
             <button
               type="submit"
               disabled={busy || mismatch || !session}
