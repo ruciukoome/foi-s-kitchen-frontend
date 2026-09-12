@@ -1,14 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import type { Service } from "@/data/services";
+import { altOf, imageOf, type ServiceRow } from "@/lib/cms";
 
-export function ServiceCard({ service }: { service: Service }) {
+export function ServiceCard({ service }: { service: ServiceRow }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl bg-card shadow-card">
       <div className="aspect-[4/5] overflow-hidden bg-secondary/60">
         <img
-          src={service.image}
-          alt={service.name}
+          src={imageOf(service)}
+          alt={altOf(service, service.name)}
           loading="lazy"
           decoding="async"
           sizes="(min-width: 768px) 33vw, 100vw"

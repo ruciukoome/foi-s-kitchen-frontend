@@ -23,7 +23,13 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
+import { Route as AdminMediaRouteImport } from './routes/admin.media'
+import { Route as AdminMenuRouteImport } from './routes/admin.menu'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminPlansRouteImport } from './routes/admin.plans'
+import { Route as AdminTestimonialsRouteImport } from './routes/admin.testimonials'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiPublicSupabaseStatusRouteImport } from './routes/api/public/supabase-status'
 
@@ -97,9 +103,39 @@ const AccountOrdersRoute = AccountOrdersRouteImport.update({
   path: '/account/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGalleryRoute = AdminGalleryRouteImport.update({
+  id: '/admin/gallery',
+  path: '/admin/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMediaRoute = AdminMediaRouteImport.update({
+  id: '/admin/media',
+  path: '/admin/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMenuRoute = AdminMenuRouteImport.update({
+  id: '/admin/menu',
+  path: '/admin/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/admin/orders',
   path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPlansRoute = AdminPlansRouteImport.update({
+  id: '/admin/plans',
+  path: '/admin/plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
+  id: '/admin/testimonials',
+  path: '/admin/testimonials',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -127,9 +163,15 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/media': typeof AdminMediaRoute
+  '/admin/menu': typeof AdminMenuRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/testimonials': typeof AdminTestimonialsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
 export interface FileRoutesByTo {
@@ -146,9 +188,15 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/media': typeof AdminMediaRoute
+  '/admin/menu': typeof AdminMenuRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/testimonials': typeof AdminTestimonialsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/account': typeof AccountIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
 export interface FileRoutesById {
@@ -166,9 +214,15 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/media': typeof AdminMediaRoute
+  '/admin/menu': typeof AdminMenuRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/testimonials': typeof AdminTestimonialsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/supabase-status': typeof ApiPublicSupabaseStatusRoute
 }
 export interface FileRouteTypes {
@@ -187,9 +241,15 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/account/orders'
+    | '/admin/gallery'
+    | '/admin/media'
+    | '/admin/menu'
     | '/admin/orders'
+    | '/admin/plans'
+    | '/admin/testimonials'
     | '/auth/callback'
     | '/account/'
+    | '/admin/'
     | '/api/public/supabase-status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -206,9 +266,15 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/account/orders'
+    | '/admin/gallery'
+    | '/admin/media'
+    | '/admin/menu'
     | '/admin/orders'
+    | '/admin/plans'
+    | '/admin/testimonials'
     | '/auth/callback'
     | '/account'
+    | '/admin'
     | '/api/public/supabase-status'
   id:
     | '__root__'
@@ -225,9 +291,15 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/account/orders'
+    | '/admin/gallery'
+    | '/admin/media'
+    | '/admin/menu'
     | '/admin/orders'
+    | '/admin/plans'
+    | '/admin/testimonials'
     | '/auth/callback'
     | '/account/'
+    | '/admin/'
     | '/api/public/supabase-status'
   fileRoutesById: FileRoutesById
 }
@@ -245,9 +317,15 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   AccountOrdersRoute: typeof AccountOrdersRoute
+  AdminGalleryRoute: typeof AdminGalleryRoute
+  AdminMediaRoute: typeof AdminMediaRoute
+  AdminMenuRoute: typeof AdminMenuRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminPlansRoute: typeof AdminPlansRoute
+  AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AccountIndexRoute: typeof AccountIndexRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicSupabaseStatusRoute: typeof ApiPublicSupabaseStatusRoute
 }
 
@@ -351,11 +429,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/gallery': {
+      id: '/admin/gallery'
+      path: '/admin/gallery'
+      fullPath: '/admin/gallery'
+      preLoaderRoute: typeof AdminGalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/media': {
+      id: '/admin/media'
+      path: '/admin/media'
+      fullPath: '/admin/media'
+      preLoaderRoute: typeof AdminMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/menu': {
+      id: '/admin/menu'
+      path: '/admin/menu'
+      fullPath: '/admin/menu'
+      preLoaderRoute: typeof AdminMenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/orders': {
       id: '/admin/orders'
       path: '/admin/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/plans': {
+      id: '/admin/plans'
+      path: '/admin/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AdminPlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/testimonials': {
+      id: '/admin/testimonials'
+      path: '/admin/testimonials'
+      fullPath: '/admin/testimonials'
+      preLoaderRoute: typeof AdminTestimonialsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -389,9 +509,15 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   AccountOrdersRoute: AccountOrdersRoute,
+  AdminGalleryRoute: AdminGalleryRoute,
+  AdminMediaRoute: AdminMediaRoute,
+  AdminMenuRoute: AdminMenuRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminPlansRoute: AdminPlansRoute,
+  AdminTestimonialsRoute: AdminTestimonialsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AccountIndexRoute: AccountIndexRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ApiPublicSupabaseStatusRoute: ApiPublicSupabaseStatusRoute,
 }
 export const routeTree = rootRouteImport

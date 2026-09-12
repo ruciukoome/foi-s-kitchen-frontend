@@ -1,14 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChefHat, Leaf, MessageCircle, ClipboardCheck, CookingPot, Bike } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
 import { SectionReveal } from "@/components/SectionReveal";
 import { TestimonialCard } from "@/components/TestimonialCard";
 import { MealOfTheDay } from "@/components/MealOfTheDay";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { PrimaryLink, OutlineLink } from "@/components/CtaButtons";
 import { ServiceCard } from "@/components/ServiceCard";
-import { testimonials } from "@/data/testimonials";
-import { services } from "@/data/services";
-import { categories, menuItems } from "@/data/menu";
+import { SkeletonGrid } from "@/components/CmsState";
+import {
+  imageOf,
+  menuCategories,
+  menuItemsQuery,
+  pageSectionsQuery,
+  sectionContent,
+  servicesQuery,
+  testimonialsQuery,
+} from "@/lib/cms";
+import { iconFor } from "@/lib/icons";
 import { site } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
@@ -30,42 +39,56 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
+type IconItem = { icon: string; title: string; body: string };
 
-const features = [
-  { icon: Leaf, title: "Fresh daily", body: "Cooked the morning it's delivered. Never reheated stock." },
-  { icon: ChefHat, title: "Custom catering", body: "From 20-person office lunches to 300-guest weddings." },
-  { icon: MessageCircle, title: "WhatsApp support", body: "A real person replies. Usually within a few minutes." },
+const defaultFeatures: IconItem[] = [
+  { icon: "Leaf", title: "Fresh daily", body: "Cooked the morning it's delivered. Never reheated stock." },
+  { icon: "ChefHat", title: "Custom catering", body: "From 20-person office lunches to 300-guest weddings." },
+  { icon: "MessageCircle", title: "WhatsApp support", body: "A real person replies. Usually within a few minutes." },
 ];
 
-const steps = [
-  { icon: ClipboardCheck, title: "Order", body: "Pick your dishes or tell us about the event." },
-  { icon: MessageCircle, title: "Confirm", body: "We agree the menu, timing and price on WhatsApp." },
-  { icon: CookingPot, title: "Prepare", body: "Everything is cooked fresh in our Nairobi kitchen." },
-  { icon: Bike, title: "Deliver", body: "Hot, on time, wherever you are in the city." },
+const defaultSteps: IconItem[] = [
+  { icon: "ClipboardCheck", title: "Order", body: "Pick your dishes or tell us about the event." },
+  { icon: "MessageCircle", title: "Confirm", body: "We agree the menu, timing and price on WhatsApp." },
+  { icon: "CookingPot", title: "Prepare", body: "Everything is cooked fresh in our Nairobi kitchen." },
+  { icon: "Bike", title: "Deliver", body: "Hot, on time, wherever you are in the city." },
 ];
-
-const featuredCategories = categories.map((c) => ({
-  name: c,
-  image: menuItems.find((m) => m.category === c)!.image,
-}));
 
 function HomePage() {
+  const sections = useQuery(pageSectionsQuery("home"));
+  const servicesList = useQuery(servicesQuery);
+  const menu = useQuery(menuItemsQuery);
+  const reviews = useQuery(testimonialsQuery);
+
+  const features =
+    sectionContent<{ items?: IconItem[] }>(sections.data, "feature-icons", {}).items ?? defaultFeatures;
+  const steps =
+    sectionContent<{ items?: IconItem[] }>(sections.data, "how-it-works", {}).items ?? defaultSteps;
+
+  const featuredCategories = menuCategories
+    .map((name) => {
+      const first = menu.data?.find((m) => m.category === name);
+      return first ? { name, image: imageOf(first) } : null;
+    })
+    .filter((c): c is { name: (typeof menuCategories)[number]; image: string } => c !== null);
 
   return (
     <>
       <HeroCarousel />
 
-
       {/* Features */}
       <section className="section-y bg-card">
         <div className="container-page grid gap-8 md:grid-cols-3">
-          {features.map((f, i) => (
-            <SectionReveal key={f.title} delay={i * 80} className="flex flex-col gap-3">
-              <f.icon className="h-8 w-8 text-primary" strokeWidth={1.5} aria-hidden="true" />
-              <h2 className="font-display text-xl font-semibold">{f.title}</h2>
-              <p className="text-muted-foreground">{f.body}</p>
-            </SectionReveal>
-          ))}
+          {features.map((f, i) => {
+            const Icon = iconFor(f.icon);
+            return (
+              <SectionReveal key={f.title} delay={i * 80} className="flex flex-col gap-3">
+                <Icon className="h-8 w-8 text-primary" strokeWidth={1.5} aria-hidden="true" />
+                <h2 className="font-display text-xl font-semibold">{f.title}</h2>
+                <p className="text-muted-foreground">{f.body}</p>
+              </SectionReveal>
+            );
+          })}
         </div>
       </section>
 
@@ -79,12 +102,18 @@ function HomePage() {
             </h2>
           </SectionReveal>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {services.map((service, i) => (
-              <SectionReveal key={service.id} delay={i * 80}>
-                <ServiceCard service={service} />
-              </SectionReveal>
-            ))}
+          <div className="mt-8">
+            {servicesList.isLoading ? (
+              <SkeletonGrid count={3} />
+            ) : (
+              <div className="grid gap-6 md:grid-cols-3">
+                {servicesList.data?.map((service, i) => (
+                  <SectionReveal key={service.id} delay={i * 80}>
+                    <ServiceCard service={service} />
+                  </SectionReveal>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -143,17 +172,20 @@ function HomePage() {
           </SectionReveal>
 
           <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {steps.map((s, i) => (
-              <SectionReveal as="li" key={s.title} delay={i * 80} className="flex flex-col gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-secondary">
-                  <s.icon className="h-6 w-6 text-primary" strokeWidth={1.5} aria-hidden="true" />
-                </span>
-                <h3 className="font-display text-lg font-semibold">
-                  {i + 1}. {s.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">{s.body}</p>
-              </SectionReveal>
-            ))}
+            {steps.map((s, i) => {
+              const Icon = iconFor(s.icon);
+              return (
+                <SectionReveal as="li" key={s.title} delay={i * 80} className="flex flex-col gap-3">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-secondary">
+                    <Icon className="h-6 w-6 text-primary" strokeWidth={1.5} aria-hidden="true" />
+                  </span>
+                  <h3 className="font-display text-lg font-semibold">
+                    {i + 1}. {s.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{s.body}</p>
+                </SectionReveal>
+              );
+            })}
           </ol>
         </div>
       </section>
@@ -168,12 +200,18 @@ function HomePage() {
             </h2>
           </SectionReveal>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {testimonials.map((t, i) => (
-              <SectionReveal key={t.id} delay={i * 60}>
-                <TestimonialCard testimonial={t} />
-              </SectionReveal>
-            ))}
+          <div className="mt-8">
+            {reviews.isLoading ? (
+              <SkeletonGrid count={4} className="lg:grid-cols-4" />
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {reviews.data?.map((t, i) => (
+                  <SectionReveal key={t.id} delay={i * 60}>
+                    <TestimonialCard testimonial={t} />
+                  </SectionReveal>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>

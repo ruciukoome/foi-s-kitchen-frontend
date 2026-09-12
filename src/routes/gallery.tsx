@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { PageHero } from "@/components/PageHero";
 import { SectionReveal } from "@/components/SectionReveal";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { TestimonialCard } from "@/components/TestimonialCard";
 import { PrimaryLink } from "@/components/CtaButtons";
-import { galleryFilters, galleryItems, type GalleryFilter } from "@/data/gallery";
-import { testimonials } from "@/data/testimonials";
+import { SkeletonGrid } from "@/components/CmsState";
+import { galleryFilters, galleryItemsQuery, testimonialsQuery, type GalleryFilter } from "@/lib/cms";
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({
@@ -30,10 +31,15 @@ export const Route = createFileRoute("/gallery")({
 
 function GalleryPage() {
   const [filter, setFilter] = useState<GalleryFilter>("All");
+  const gallery = useQuery(galleryItemsQuery);
+  const reviews = useQuery(testimonialsQuery);
 
   const items = useMemo(
-    () => (filter === "All" ? galleryItems : galleryItems.filter((g) => g.filter === filter)),
-    [filter],
+    () =>
+      filter === "All"
+        ? (gallery.data ?? [])
+        : (gallery.data ?? []).filter((g) => g.category === filter),
+    [gallery.data, filter],
   );
 
   return (
@@ -41,7 +47,7 @@ function GalleryPage() {
       <PageHero
         eyebrow="Gallery & reviews"
         title="Plates we're proud of, and people who came back."
-        intro="Real events, real food, real reviews. [PLACEHOLDER] Photography to be replaced with your own."
+        intro="Real events, real food, real reviews."
       >
         <PrimaryLink to="/quote">Request a quotation</PrimaryLink>
       </PageHero>
@@ -50,7 +56,7 @@ function GalleryPage() {
         <div className="container-page">
           <CategoryTabs options={galleryFilters} value={filter} onChange={setFilter} label="Gallery filters" />
           <div key={filter} className="mt-8">
-            <GalleryGrid items={items} />
+            {gallery.isLoading ? <SkeletonGrid count={6} /> : <GalleryGrid items={items} />}
           </div>
         </div>
       </section>
@@ -62,12 +68,18 @@ function GalleryPage() {
             <h2 className="mt-2 font-display text-[1.75rem] font-semibold md:text-[2rem]">What clients say</h2>
           </SectionReveal>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {testimonials.map((t, i) => (
-              <SectionReveal key={t.id} delay={i * 60}>
-                <TestimonialCard testimonial={t} />
-              </SectionReveal>
-            ))}
+          <div className="mt-8">
+            {reviews.isLoading ? (
+              <SkeletonGrid count={4} className="lg:grid-cols-4" />
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {reviews.data?.map((t, i) => (
+                  <SectionReveal key={t.id} delay={i * 60}>
+                    <TestimonialCard testimonial={t} />
+                  </SectionReveal>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { pageSectionsQuery, sectionContent } from "@/lib/cms";
 import hero1 from "@/assets/hero-1.jpg";
 import hero2 from "@/assets/hero-2.jpg";
 import hero3 from "@/assets/hero-3.jpg";
 import menuPilau from "@/assets/menu-pilau.jpg";
 
-type Slide = {
+export type HeroSlide = {
   id: string;
   eyebrow: string;
   title: string;
@@ -20,7 +22,8 @@ type Slide = {
   cta: string;
 };
 
-const slides: Slide[] = [
+/** Used until the CMS row loads (and as the seed for page_sections home/hero). */
+export const defaultHeroSlides: HeroSlide[] = [
   {
     id: "catering",
     eyebrow: "Nairobi · Catering & meal prep",
@@ -70,10 +73,9 @@ const slides: Slide[] = [
 
 const SWIPE = 50;
 const INTERVAL = 4000;
-const count = slides.length;
 
 /** Shortest signed distance from active to index, wrapping around. */
-function offsetOf(index: number, active: number) {
+function offsetOf(index: number, active: number, count: number) {
   let d = index - active;
   if (d > count / 2) d -= count;
   if (d < -count / 2) d += count;
@@ -81,12 +83,21 @@ function offsetOf(index: number, active: number) {
 }
 
 export function HeroCarousel() {
+  const { data } = useQuery({ ...pageSectionsQuery("home"), staleTime: 5 * 60 * 1000 });
+  const fromCms = sectionContent<{ slides?: HeroSlide[] }>(data, "hero", {}).slides;
+  const slides = fromCms?.length ? fromCms : defaultHeroSlides;
+  const count = slides.length;
+
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
   const touchEnd = useRef<number | null>(null);
 
-  const go = useCallback((i: number) => setActive((i + count) % count), []);
+  const go = useCallback((i: number) => setActive((i + count) % count), [count]);
+
+  useEffect(() => {
+    if (active >= count) setActive(0);
+  }, [active, count]);
 
   useEffect(() => {
     if (paused) return;
@@ -95,14 +106,13 @@ export function HeroCarousel() {
     }
     const t = window.setInterval(() => setActive((a) => (a + 1) % count), INTERVAL);
     return () => window.clearInterval(t);
-  }, [paused, active]);
+  }, [paused, active, count]);
 
-  const slide = slides[active]!;
+  const slide = slides[Math.min(active, count - 1)]!;
 
   return (
     <section
       className="relative min-h-[calc(100svh-72px)] overflow-hidden md:min-h-[92vh]"
-
       aria-roledescription="carousel"
       aria-label="Foi's Kitchen highlights"
       onMouseEnter={() => setPaused(true)}
@@ -142,7 +152,6 @@ export function HeroCarousel() {
       <div className="container-page relative flex min-h-[calc(100svh-72px)] flex-col justify-center pt-10 pb-24 md:min-h-[92vh] md:pt-28 md:pb-14">
         <div className="grid items-center gap-8 md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
           <div key={slide.id} className="max-w-2xl">
-
             <p className="label-caps animate-fade-up text-background/80">{slide.eyebrow}</p>
             <h1
               className="animate-fade-up mt-3 font-display text-[2rem] leading-[1.12] font-bold text-background sm:text-5xl md:mt-4 md:text-[3.3rem]"
@@ -161,13 +170,13 @@ export function HeroCarousel() {
               style={{ animationDelay: "300ms" }}
             >
               {slide.category ? (
-              <Link
-                to="/services"
-                search={{ category: slide.category }}
-                className="label-caps inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-7 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] sm:w-auto"
-              >
-                {slide.cta}
-              </Link>
+                <Link
+                  to="/services"
+                  search={{ category: slide.category }}
+                  className="label-caps inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-7 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] sm:w-auto"
+                >
+                  {slide.cta}
+                </Link>
               ) : (
                 <Link
                   to={slide.to}
@@ -186,7 +195,6 @@ export function HeroCarousel() {
 
             {/* Controls */}
             <div className="mt-6 flex items-center gap-4 md:mt-9">
-
               <button
                 type="button"
                 onClick={() => go(active - 1)}
@@ -229,7 +237,7 @@ export function HeroCarousel() {
           {/* Clamped horizontal card deck */}
           <div className="relative mx-auto h-40 w-full max-w-[460px] sm:h-56">
             {slides.map((s, i) => {
-              const pos = offsetOf(i, active);
+              const pos = offsetOf(i, active, count);
               const isActive = pos === 0;
               const visible = Math.abs(pos) <= 1;
               return (
@@ -243,7 +251,6 @@ export function HeroCarousel() {
                   className={cn(
                     "absolute top-1/2 left-1/2 -ml-20 overflow-hidden rounded-2xl text-left transition-all duration-[400ms] ease-out sm:-ml-[8rem]",
                     "h-28 w-40 sm:h-40 sm:w-64",
-
                     isActive
                       ? "shadow-2xl ring-2 ring-primary"
                       : "ring-1 ring-background/30 hover:ring-background/60",
@@ -270,7 +277,6 @@ export function HeroCarousel() {
                       !isActive && "hidden sm:block",
                     )}
                   >
-
                     <span className="block truncate font-display text-sm font-semibold leading-tight sm:text-base">
                       {s.cardLabel}
                     </span>
@@ -278,7 +284,6 @@ export function HeroCarousel() {
                       {s.cardNote}
                     </span>
                   </span>
-
                 </button>
               );
             })}

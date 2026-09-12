@@ -2,17 +2,18 @@ import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import { currency } from "@/lib/site";
-import type { Plan } from "@/data/plans";
+import { altOf, imageOf, type MealPlanRow } from "@/lib/cms";
 
-export function PlanCard({ plan }: { plan: Plan }) {
+export function PlanCard({ plan }: { plan: MealPlanRow }) {
   const { add } = useCart();
+  const price = Number(plan.price);
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl bg-card shadow-card">
       <div className="aspect-[4/5] overflow-hidden">
         <img
-          src={plan.image}
-          alt={plan.name}
+          src={imageOf(plan)}
+          alt={altOf(plan, plan.name)}
           loading="lazy"
           width={1024}
           height={1024}
@@ -22,7 +23,7 @@ export function PlanCard({ plan }: { plan: Plan }) {
 
       <div className="flex flex-1 flex-col gap-4 p-6">
         <h3 className="font-display text-xl font-semibold">
-          {plan.name} — <span className="text-primary">{currency(plan.price)}</span>{" "}
+          {plan.name} — <span className="text-primary">{currency(price)}</span>{" "}
           <span className="text-sm font-normal text-muted-foreground">{plan.cadence}</span>
         </h3>
 
@@ -46,7 +47,7 @@ export function PlanCard({ plan }: { plan: Plan }) {
         <button
           type="button"
           onClick={() => {
-            add({ id: `plan-${plan.id}`, name: `${plan.name} plan`, price: plan.price });
+            add({ id: `plan-${plan.id}`, name: `${plan.name} plan`, price });
             toast.success(`${plan.name} added to your order`);
           }}
           className="label-caps mt-auto flex min-h-[48px] items-center justify-center rounded-full bg-primary px-5 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97]"
