@@ -7,6 +7,5 @@
 - [x] Part 5: public pages read from the database
 - [x] Part 6: admin editor pages + /admin nav
 
-BLOCKED: docs/cms-schema.sql must be run in the Supabase SQL editor (DDL cannot
-be applied from here on an external project). After that, run:
-  bun run scripts/seed-cms.ts
+- [x] Schema applied + seed run (38 photos, 12 menu items, 3 services, 9 tiers,
+      3 plans, 4 reviews, 12 gallery items, 12 page sections)
