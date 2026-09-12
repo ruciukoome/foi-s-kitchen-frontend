@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart";
 import { AuthProvider } from "@/lib/auth";
+import { SiteInfoProvider } from "@/lib/site-info";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { WhatsAppFloatButton } from "@/components/WhatsAppFloatButton";
@@ -130,21 +131,23 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-      <CartProvider>
-        <div className="flex min-h-screen flex-col pb-20 md:pb-0">
-          <SiteHeader />
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <SiteFooter />
-        </div>
-        <WhatsAppFloatButton />
-        <StickyOrderBar />
-        <Toaster position="top-center" />
-      </CartProvider>
-      </AuthProvider>
+      <SiteInfoProvider>
+        <AuthProvider>
+          <CartProvider>
+            <div className="flex min-h-screen flex-col pb-20 md:pb-0">
+              <SiteHeader />
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <main className="flex-1">
+                <Outlet />
+              </main>
+              <SiteFooter />
+            </div>
+            <WhatsAppFloatButton />
+            <StickyOrderBar />
+            <Toaster position="top-center" />
+          </CartProvider>
+        </AuthProvider>
+      </SiteInfoProvider>
     </QueryClientProvider>
   );
 }
