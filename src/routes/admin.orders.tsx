@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { PageHeadingRow } from "@/components/PageHeadingRow";
-import { RequireAuth } from "@/components/RequireAuth";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { useAuth } from "@/lib/auth";
 import {
   ORDER_STATUSES,
@@ -26,11 +25,7 @@ export const Route = createFileRoute("/admin/orders")({
       { property: "og:description", content: "Internal order status tool." },
     ],
   }),
-  component: () => (
-    <RequireAuth requireAdmin>
-      <AdminOrdersPage />
-    </RequireAuth>
-  ),
+  component: AdminOrdersPage,
 });
 
 function AdminOrdersPage() {
