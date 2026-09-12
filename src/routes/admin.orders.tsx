@@ -64,8 +64,8 @@ function AdminOrdersPage() {
   }
 
   return (
-    <section className="container-page pb-16 md:pb-24">
-      <PageHeadingRow title="Orders" note="All orders — change a status to update it instantly." />
+    <AdminShell title="Orders" note="All orders — change a status to update it instantly.">
+
 
       {error && (
         <p className="rounded-2xl border border-destructive/40 bg-card p-5 text-sm text-destructive">
@@ -127,6 +127,6 @@ function AdminOrdersPage() {
           </li>
         ))}
       </ul>
-    </section>
+    </AdminShell>
   );
 }
