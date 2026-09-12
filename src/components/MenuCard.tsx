@@ -2,9 +2,9 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import { currency } from "@/lib/site";
-import type { MenuItem } from "@/data/menu";
+import { altOf, imageOf, type MenuItemRow } from "@/lib/cms";
 
-export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }) {
+export function MenuCard({ item, index = 0 }: { item: MenuItemRow; index?: number }) {
   const { add } = useCart();
 
   return (
@@ -14,8 +14,8 @@ export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }
     >
       <div className="aspect-square overflow-hidden bg-secondary/60">
         <img
-          src={item.image}
-          alt={item.name}
+          src={imageOf(item)}
+          alt={altOf(item, item.name)}
           loading="lazy"
           decoding="async"
           sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
@@ -29,9 +29,9 @@ export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }
         <h3 className="font-display text-base font-semibold sm:text-lg">{item.name}</h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
 
-        {item.diet.length > 0 && (
+        {item.diet_tags.length > 0 && (
           <ul className="flex flex-wrap gap-1.5">
-            {item.diet.map((d) => (
+            {item.diet_tags.map((d) => (
               <li
                 key={d}
                 className="rounded-full bg-sage/15 px-2 py-0.5 text-[11px] font-semibold text-sage"
@@ -44,12 +44,12 @@ export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }
 
         <div className="mt-auto flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
           <span className="font-display text-base font-bold whitespace-nowrap text-primary">
-            {currency(item.price)}
+            {currency(Number(item.price))}
           </span>
           <button
             type="button"
             onClick={() => {
-              add({ id: item.id, name: item.name, price: item.price });
+              add({ id: item.id, name: item.name, price: Number(item.price) });
               toast.success(`${item.name} added to your order`);
             }}
             className="label-caps flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] sm:w-auto"
@@ -58,7 +58,6 @@ export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }
             Add
           </button>
         </div>
-
       </div>
     </article>
   );
