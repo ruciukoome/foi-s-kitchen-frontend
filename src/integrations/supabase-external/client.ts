@@ -6,18 +6,31 @@ let clientPromise: Promise<SupabaseClient | null> | undefined;
 
 /**
  * Browser Supabase client for the connected external project.
- * Config is fetched once from the server (the keys live in project secrets),
- * then cached for the lifetime of the page.
+ *
+ * Public config comes from build-time VITE_ variables first (needed for
+ * static/Netlify deploys, where Lovable's server secrets don't exist).
+ * When those are absent — e.g. the Lovable preview — it falls back to the
+ * server function that reads the project secrets.
  */
 export function getSupabaseClient(): Promise<SupabaseClient | null> {
   if (!clientPromise) {
-    clientPromise = getSupabasePublicConfig().then(({ url, anonKey, configured }) =>
-      configured
-        ? createClient(url, anonKey, {
-            auth: { persistSession: true, autoRefreshToken: true },
-          })
-        : null,
-    );
+    const url = import.meta.env.VITE_EXT_SUPABASE_URL as string | undefined;
+    const anonKey = import.meta.env.VITE_EXT_SUPABASE_ANON_KEY as string | undefined;
+
+    clientPromise =
+      url && anonKey
+        ? Promise.resolve(
+            createClient(url, anonKey, {
+              auth: { persistSession: true, autoRefreshToken: true },
+            }),
+          )
+        : getSupabasePublicConfig().then(({ url, anonKey, configured }) =>
+            configured
+              ? createClient(url, anonKey, {
+                  auth: { persistSession: true, autoRefreshToken: true },
+                })
+              : null,
+          );
   }
   return clientPromise;
 }
