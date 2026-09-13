@@ -43,43 +43,59 @@ async function isValidPublicConfig(url: string, anonKey: string) {
   }
 }
 
+/** Human-readable reason why no client could be created (for support/debug). */
+let configReason = "";
+
+export function getSupabaseConfigReason() {
+  return configReason;
+}
+
 export function getSupabaseClient(): Promise<SupabaseClient | null> {
   if (!clientPromise) {
     clientPromise = (async () => {
+      const candidates: Array<{ source: string; url: string; anonKey: string }> = [];
+
       const buildUrl = cleanConfigValue(
         import.meta.env["VITE_EXT_SUPABASE_URL"] as string | undefined,
       );
       const buildAnonKey = cleanConfigValue(
         import.meta.env["VITE_EXT_SUPABASE_ANON_KEY"] as string | undefined,
       );
-
-      if (
-        buildUrl &&
-        buildAnonKey &&
-        (await isValidPublicConfig(buildUrl, buildAnonKey))
-      ) {
-        return createClient(buildUrl, buildAnonKey, { auth: { ...authOptions } });
+      if (buildUrl && buildAnonKey) {
+        candidates.push({ source: "build-time VITE_ variables", url: buildUrl, anonKey: buildAnonKey });
       }
 
       try {
         const config = await getSupabasePublicConfig();
         const serverUrl = cleanConfigValue(config.url);
         const serverAnonKey = cleanConfigValue(config.anonKey);
-        if (
-          config.configured &&
-          serverUrl &&
-          serverAnonKey &&
-          (await isValidPublicConfig(serverUrl, serverAnonKey))
-        ) {
-          return createClient(serverUrl, serverAnonKey, { auth: { ...authOptions } });
+        if (config.configured && serverUrl && serverAnonKey) {
+          candidates.push({ source: "server settings", url: serverUrl, anonKey: serverAnonKey });
         }
       } catch {
-        // Static hosts may not provide the server fallback. In that case the
-        // build-time values above must be configured correctly.
+        // Static hosts may not provide the server fallback.
       }
 
-      return null;
+      if (candidates.length === 0) {
+        configReason =
+          "No Supabase URL/anon key available. Set VITE_EXT_SUPABASE_URL and VITE_EXT_SUPABASE_ANON_KEY in the hosting environment.";
+        return null;
+      }
+
+      for (const candidate of candidates) {
+        if (await isValidPublicConfig(candidate.url, candidate.anonKey)) {
+          configReason = "";
+          return createClient(candidate.url, candidate.anonKey, { auth: { ...authOptions } });
+        }
+      }
+
+      // None validated (bad key, or the check itself was blocked). Use the first
+      // candidate anyway so Supabase can report the real error to the customer.
+      const fallback = candidates[0]!;
+      configReason = `Supabase rejected the ${fallback.source} (check the Project URL and anon key).`;
+      return createClient(fallback.url, fallback.anonKey, { auth: { ...authOptions } });
     })();
   }
   return clientPromise;
 }
+
