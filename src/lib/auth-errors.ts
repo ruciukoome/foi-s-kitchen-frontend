@@ -40,6 +40,11 @@ export function mapAuthError(error: unknown, mode: "sign-in" | "sign-up" | "rese
   if (message.includes("failed to fetch") || message.includes("network")) {
     return { form: "We couldn't reach the server. Check your connection and try again." };
   }
+  if (message.includes("invalid api key") || message.includes("no api key found")) {
+    return {
+      form: "Accounts are temporarily unavailable because the site connection is misconfigured.",
+    };
+  }
   if (message.includes("expired") || message.includes("token")) {
     return {
       form:

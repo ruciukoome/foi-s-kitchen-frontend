@@ -15,23 +15,71 @@ let clientPromise: Promise<SupabaseClient | null> | undefined;
 const authOptions = {
   persistSession: true,
   autoRefreshToken: true,
-  // Required so the sign-in link/redirect that lands on /auth/callback is
-  // turned into a real session instead of being ignored.
-  detectSessionInUrl: true,
+  // AuthProvider handles the PKCE code explicitly so routing cannot win a
+  // race against Supabase's background URL detection.
+  detectSessionInUrl: false,
   flowType: "pkce",
 } as const;
 
+function cleanConfigValue(value: string | undefined) {
+  const trimmed = value?.trim() ?? "";
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+async function isValidPublicConfig(url: string, anonKey: string) {
+  try {
+    const response = await fetch(`${url.replace(/\/$/, "")}/auth/v1/settings`, {
+      headers: { apikey: anonKey },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export function getSupabaseClient(): Promise<SupabaseClient | null> {
   if (!clientPromise) {
-    const url = import.meta.env["VITE_EXT_SUPABASE_URL"] as string | undefined;
-    const anonKey = import.meta.env["VITE_EXT_SUPABASE_ANON_KEY"] as string | undefined;
+    clientPromise = (async () => {
+      const buildUrl = cleanConfigValue(
+        import.meta.env["VITE_EXT_SUPABASE_URL"] as string | undefined,
+      );
+      const buildAnonKey = cleanConfigValue(
+        import.meta.env["VITE_EXT_SUPABASE_ANON_KEY"] as string | undefined,
+      );
 
-    clientPromise =
-      url && anonKey
-        ? Promise.resolve(createClient(url, anonKey, { auth: { ...authOptions } }))
-        : getSupabasePublicConfig().then(({ url, anonKey, configured }) =>
-            configured ? createClient(url, anonKey, { auth: { ...authOptions } }) : null,
-          );
+      if (
+        buildUrl &&
+        buildAnonKey &&
+        (await isValidPublicConfig(buildUrl, buildAnonKey))
+      ) {
+        return createClient(buildUrl, buildAnonKey, { auth: { ...authOptions } });
+      }
+
+      try {
+        const config = await getSupabasePublicConfig();
+        const serverUrl = cleanConfigValue(config.url);
+        const serverAnonKey = cleanConfigValue(config.anonKey);
+        if (
+          config.configured &&
+          serverUrl &&
+          serverAnonKey &&
+          (await isValidPublicConfig(serverUrl, serverAnonKey))
+        ) {
+          return createClient(serverUrl, serverAnonKey, { auth: { ...authOptions } });
+        }
+      } catch {
+        // Static hosts may not provide the server fallback. In that case the
+        // build-time values above must be configured correctly.
+      }
+
+      return null;
+    })();
   }
   return clientPromise;
 }
