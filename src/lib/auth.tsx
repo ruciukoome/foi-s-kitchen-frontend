@@ -49,6 +49,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         setClient(c);
+        const currentUrl = new URL(window.location.href);
+        const isAuthLanding =
+          currentUrl.pathname === "/auth/callback" || currentUrl.pathname === "/reset-password";
+        const authCode = isAuthLanding ? currentUrl.searchParams.get("code") : null;
+
+        if (authCode) {
+          const { error } = await c.auth.exchangeCodeForSession(authCode);
+          if (error) {
+            const existing = await c.auth.getSession();
+            if (!existing.data.session) throw error;
+          } else {
+            currentUrl.searchParams.delete("code");
+            window.history.replaceState({}, "", `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`);
+          }
+        }
+
         const { data } = await c.auth.getSession();
         if (cancelled) return;
         setSession(data.session);

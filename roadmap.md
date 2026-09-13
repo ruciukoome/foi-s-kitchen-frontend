@@ -6,6 +6,8 @@
 - [x] Part 4: seed script (scripts/seed-cms.ts) — uploads src/assets, fills every table
 - [x] Part 5: public pages read from the database
 - [x] Part 6: admin editor pages + /admin nav
+- [x] Validate and normalize deployed account settings, with a safe server fallback
+- [x] Complete Google and email-link PKCE sessions before redirecting
 
 - [x] Schema applied + seed run (38 photos, 12 menu items, 3 services, 9 tiers,
       3 plans, 4 reviews, 12 gallery items, 12 page sections)
