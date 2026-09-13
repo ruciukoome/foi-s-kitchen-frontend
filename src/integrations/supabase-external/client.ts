@@ -14,8 +14,8 @@ let clientPromise: Promise<SupabaseClient | null> | undefined;
  */
 export function getSupabaseClient(): Promise<SupabaseClient | null> {
   if (!clientPromise) {
-    const url = import.meta.env.VITE_EXT_SUPABASE_URL as string | undefined;
-    const anonKey = import.meta.env.VITE_EXT_SUPABASE_ANON_KEY as string | undefined;
+    const url = import.meta.env["VITE_EXT_SUPABASE_URL"] as string | undefined;
+    const anonKey = import.meta.env["VITE_EXT_SUPABASE_ANON_KEY"] as string | undefined;
 
     clientPromise =
       url && anonKey
