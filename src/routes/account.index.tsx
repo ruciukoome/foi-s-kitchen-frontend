@@ -37,6 +37,7 @@ function AccountPage() {
     default_method: "Delivery",
   });
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
@@ -62,8 +63,11 @@ function AccountPage() {
       })
       .eq("id", user.id);
     setSaving(false);
-    if (error) toast.error(error.message);
-    else {
+    if (error) {
+      setSaved(false);
+      toast.error(error.message);
+    } else {
+      setSaved(true);
       toast.success("Details saved.");
       void refreshProfile();
     }
@@ -136,6 +140,11 @@ function AccountPage() {
           <button type="submit" disabled={saving} className={primaryButtonClass}>
             {saving ? "Saving…" : "Save details"}
           </button>
+          {saved && (
+            <Link to="/" className={primaryButtonClass}>
+              Go to home page
+            </Link>
+          )}
           <Link to="/account/orders" className={outlineButtonClass}>
             My orders
           </Link>

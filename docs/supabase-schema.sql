@@ -13,7 +13,13 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
-grant select, update on public.profiles to authenticated;
+-- SECURITY: customers may only edit their own contact details. Column-level
+-- grants stop anyone from switching is_admin on their own profile through the
+-- public API. Re-run these two lines in the SQL editor on an existing project.
+revoke update on public.profiles from authenticated;
+grant select on public.profiles to authenticated;
+grant update (full_name, phone, default_address, default_method)
+  on public.profiles to authenticated;
 grant all on public.profiles to service_role;
 
 alter table public.profiles enable row level security;
