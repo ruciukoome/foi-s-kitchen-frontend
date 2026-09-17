@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -10,8 +10,67 @@ import { useAuth } from "@/lib/auth";
 import { mapAuthError, unavailableError, type AuthFieldErrors } from "@/lib/auth-errors";
 import { primaryButtonClass } from "@/lib/ui";
 
+type GoogleCredentialResponse = {
+  credential?: string;
+};
+
+type GooglePromptMoment = {
+  isDismissedMoment: () => boolean;
+};
+
+type GoogleIdentity = {
+  accounts: {
+    id: {
+      initialize: (options: {
+        client_id: string;
+        callback: (response: GoogleCredentialResponse) => void;
+        cancel_on_tap_outside?: boolean;
+        use_fedcm_for_prompt?: boolean;
+      }) => void;
+      prompt: (listener?: (notification: GooglePromptMoment) => void) => void;
+      cancel: () => void;
+    };
+  };
+};
+
+declare global {
+  interface Window {
+    google?: GoogleIdentity;
+  }
+}
+
+let googleIdentityScriptPromise: Promise<void> | undefined;
+
+function loadGoogleIdentityScript() {
+  if (window.google?.accounts.id) return Promise.resolve();
+  if (googleIdentityScriptPromise) return googleIdentityScriptPromise;
+
+  googleIdentityScriptPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[src="https://accounts.google.com/gsi/client"]',
+    );
+    if (existing) {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error("Google sign-in did not load.")), {
+        once: true,
+      });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Google sign-in did not load."));
+    document.head.appendChild(script);
+  });
+
+  return googleIdentityScriptPromise;
+}
+
 export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
-  const { client } = useAuth();
+  const { client, user } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +78,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [busy, setBusy] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
   const [errors, setErrors] = useState<AuthFieldErrors>({});
+  const oneTapStarted = useRef(false);
 
   const isSignUp = mode === "sign-up";
   const mismatch = isSignUp && confirmPassword.length > 0 && confirmPassword !== password;
@@ -33,6 +93,64 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
     if (data?.is_admin) return navigate({ to: "/admin/orders" });
     return navigate({ to: "/" });
   }
+
+  useEffect(() => {
+    if (!client || user || oneTapStarted.current) return;
+    oneTapStarted.current = true;
+    let cancelled = false;
+
+    async function showGoogleOneTap() {
+      if (!client) return;
+
+      const { data, error } = await client.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error || !data.url || cancelled) return;
+
+      const clientId = new URL(data.url).searchParams.get("client_id");
+      if (!clientId) return;
+
+      await loadGoogleIdentityScript();
+      if (cancelled || !window.google?.accounts.id) return;
+
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        cancel_on_tap_outside: true,
+        use_fedcm_for_prompt: true,
+        callback: (response) => {
+          if (!response.credential || cancelled) return;
+          setBusy(true);
+          setErrors({});
+          void client.auth
+            .signInWithIdToken({ provider: "google", token: response.credential })
+            .then(async ({ data: signInData, error: signInError }) => {
+              if (signInError) throw signInError;
+              toast.success(isSignUp ? "Account created." : "Signed in.");
+              await routeByRole(signInData.user.id);
+            })
+            .catch((signInError: unknown) => {
+              setErrors(mapAuthError(signInError, isSignUp ? "sign-up" : "sign-in"));
+            })
+            .finally(() => setBusy(false));
+        },
+      });
+      window.google.accounts.id.prompt();
+    }
+
+    void showGoogleOneTap().catch(() => {
+      // Google may suppress One Tap because of browser or origin settings.
+      // The visible Google button below remains available in every case.
+    });
+
+    return () => {
+      cancelled = true;
+      window.google?.accounts.id.cancel();
+    };
+  }, [client, isSignUp, user]);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -94,7 +212,10 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
     }
     const { error } = await client.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
+      },
     });
     if (error) setErrors(mapAuthError(error, isSignUp ? "sign-up" : "sign-in"));
   }
