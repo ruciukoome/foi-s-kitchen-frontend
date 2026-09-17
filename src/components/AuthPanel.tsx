@@ -101,7 +101,9 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
     async function showGoogleOneTap() {
       if (!client) return;
       const { clientId } = await loadGoogleClientId({
-        data: { projectUrl: client.supabaseUrl },
+        data: {
+          projectUrl: import.meta.env["VITE_EXT_SUPABASE_URL"] as string | undefined,
+        },
       });
       if (!clientId) return;
 
