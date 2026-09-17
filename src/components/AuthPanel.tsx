@@ -1,21 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
 import logo from "@/assets/logo.png";
 import { EmailField } from "@/components/EmailField";
 import { FormAlert } from "@/components/FormAlert";
 import { PasswordField } from "@/components/PasswordField";
+import { getGoogleOAuthClientId } from "@/integrations/supabase-external/config.functions";
 import { useAuth } from "@/lib/auth";
 import { mapAuthError, unavailableError, type AuthFieldErrors } from "@/lib/auth-errors";
 import { primaryButtonClass } from "@/lib/ui";
 
 type GoogleCredentialResponse = {
   credential?: string;
-};
-
-type GooglePromptMoment = {
-  isDismissedMoment: () => boolean;
 };
 
 type GoogleIdentity = {
@@ -27,7 +25,7 @@ type GoogleIdentity = {
         cancel_on_tap_outside?: boolean;
         use_fedcm_for_prompt?: boolean;
       }) => void;
-      prompt: (listener?: (notification: GooglePromptMoment) => void) => void;
+      prompt: () => void;
       cancel: () => void;
     };
   };
@@ -72,6 +70,7 @@ function loadGoogleIdentityScript() {
 export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const { client, user } = useAuth();
   const navigate = useNavigate();
+  const loadGoogleClientId = useServerFn(getGoogleOAuthClientId);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -101,17 +100,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
 
     async function showGoogleOneTap() {
       if (!client) return;
-
-      const { data, error } = await client.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          skipBrowserRedirect: true,
-        },
-      });
-      if (error || !data.url || cancelled) return;
-
-      const clientId = new URL(data.url).searchParams.get("client_id");
+      const { clientId } = await loadGoogleClientId();
       if (!clientId) return;
 
       await loadGoogleIdentityScript();
@@ -150,7 +139,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
       cancelled = true;
       window.google?.accounts.id.cancel();
     };
-  }, [client, isSignUp, user]);
+  }, [client, isSignUp, loadGoogleClientId, user]);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
