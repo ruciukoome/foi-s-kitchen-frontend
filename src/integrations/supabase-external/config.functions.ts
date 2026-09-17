@@ -13,7 +13,7 @@ export const getSupabasePublicConfig = createServerFn({ method: "GET" }).handler
 
 /** Public Google Web client ID from the OAuth provider already configured in Supabase. */
 export const getGoogleOAuthClientId = createServerFn({ method: "GET" })
-  .inputValidator((data: { projectUrl?: string }) => data)
+  .inputValidator((data: { projectUrl: string }) => data)
   .handler(async ({ data }) => {
   const configuredUrl = process.env["EXT_SUPABASE_URL"];
   const requestedUrl = data.projectUrl?.trim();

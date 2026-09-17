@@ -102,7 +102,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
       if (!client) return;
       const { clientId } = await loadGoogleClientId({
         data: {
-          projectUrl: import.meta.env["VITE_EXT_SUPABASE_URL"] as string | undefined,
+          projectUrl: (import.meta.env["VITE_EXT_SUPABASE_URL"] as string | undefined) ?? "",
         },
       });
       if (!clientId) return;
