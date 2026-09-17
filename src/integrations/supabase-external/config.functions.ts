@@ -12,9 +12,22 @@ export const getSupabasePublicConfig = createServerFn({ method: "GET" }).handler
 });
 
 /** Public Google Web client ID from the OAuth provider already configured in Supabase. */
-export const getGoogleOAuthClientId = createServerFn({ method: "GET" }).handler(async () => {
-  const url = process.env["EXT_SUPABASE_URL"];
+export const getGoogleOAuthClientId = createServerFn({ method: "GET" })
+  .inputValidator((data: { projectUrl?: string }) => data)
+  .handler(async ({ data }) => {
+  const configuredUrl = process.env["EXT_SUPABASE_URL"];
+  const requestedUrl = data.projectUrl?.trim();
+  const url = configuredUrl || requestedUrl;
   if (!url) return { clientId: "" };
+
+  try {
+    const project = new URL(url);
+    if (project.protocol !== "https:" || !project.hostname.endsWith(".supabase.co")) {
+      return { clientId: "" };
+    }
+  } catch {
+    return { clientId: "" };
+  }
 
   try {
     const response = await fetch(
@@ -27,7 +40,7 @@ export const getGoogleOAuthClientId = createServerFn({ method: "GET" }).handler(
   } catch {
     return { clientId: "" };
   }
-});
+  });
 
 /** Lightweight reachability check against the connected project's REST endpoint. */
 export const checkSupabaseConnection = createServerFn({ method: "GET" }).handler(async () => {

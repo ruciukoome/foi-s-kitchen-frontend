@@ -100,7 +100,9 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
 
     async function showGoogleOneTap() {
       if (!client) return;
-      const { clientId } = await loadGoogleClientId();
+      const { clientId } = await loadGoogleClientId({
+        data: { projectUrl: client.supabaseUrl },
+      });
       if (!clientId) return;
 
       await loadGoogleIdentityScript();
