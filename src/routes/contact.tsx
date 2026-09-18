@@ -4,6 +4,7 @@ import { PageHero } from "@/components/PageHero";
 import { SectionReveal } from "@/components/SectionReveal";
 import { ContactForm } from "@/components/ContactForm";
 import { WhatsAppLink } from "@/components/CtaButtons";
+import { SocialLinks } from "@/components/SocialLinks";
 import { site } from "@/lib/site";
 
 export const Route = createFileRoute("/contact")({
