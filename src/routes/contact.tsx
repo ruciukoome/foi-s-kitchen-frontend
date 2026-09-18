@@ -74,6 +74,11 @@ function ContactPage() {
               </li>
             </ul>
 
+            <div>
+              <span className="label-caps block text-xs text-muted-foreground">Follow us</span>
+              <SocialLinks className="mt-2" itemClassName="border-border" />
+            </div>
+
             <iframe
               title="Foi's Kitchen location"
               src={site.mapEmbed}
