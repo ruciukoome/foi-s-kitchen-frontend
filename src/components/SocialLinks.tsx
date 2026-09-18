@@ -1,4 +1,5 @@
-import { Facebook, Instagram, Youtube, type LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
+import { Facebook, Instagram, Youtube } from "lucide-react";
 
 import { useSite } from "@/lib/site-info";
 import { cn } from "@/lib/utils";
