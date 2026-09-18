@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Field, SelectInput, TextArea, TextInput } from "@/components/admin/Fields";
 import { MediaPicker } from "@/components/admin/MediaPicker";
+import { socialPlatforms } from "@/components/SocialLinks";
 import { defaultHeroSlides, type HeroSlide } from "@/components/HeroCarousel";
 import { pageSectionsQuery, sectionContent, type BusinessInfo } from "@/lib/cms";
 import { arrayToLines, linesToArray, usePageSection } from "@/lib/cms-admin";
@@ -501,6 +502,20 @@ function BusinessForm({
       <Field label="Google map embed link" className="md:col-span-2">
         <TextInput value={value.mapEmbed} onChange={(e) => setValue({ ...value, mapEmbed: e.target.value })} />
       </Field>
+      <p className="label-caps md:col-span-2 text-xs text-muted-foreground">
+        Social media — leave a box empty to hide that icon
+      </p>
+      {socialPlatforms.map((p) => (
+        <Field key={p.key} label={`${p.label} (link or @handle)`}>
+          <TextInput
+            value={value.socials?.[p.key] ?? ""}
+            placeholder={`${p.base}foiskitchen`}
+            onChange={(e) =>
+              setValue({ ...value, socials: { ...value.socials, [p.key]: e.target.value } })
+            }
+          />
+        </Field>
+      ))}
       <div className="md:col-span-2">
         <SaveButton saving={saving} label="Save contact details" />
       </div>
