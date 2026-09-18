@@ -126,6 +126,7 @@ export type BusinessInfo = {
   address: string;
   hours: { day: string; time: string }[];
   mapEmbed: string;
+  socials?: SocialLinksInfo;
 };
 
 /* --------------------------------------------------------------- utilities */
