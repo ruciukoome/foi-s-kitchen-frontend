@@ -110,6 +110,14 @@ export type PageSectionRow = {
   sort_order: number;
 };
 
+export type SocialLinksInfo = {
+  instagram?: string;
+  tiktok?: string;
+  facebook?: string;
+  x?: string;
+  youtube?: string;
+};
+
 export type BusinessInfo = {
   phoneDisplay: string;
   phoneTel: string;
