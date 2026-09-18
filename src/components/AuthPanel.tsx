@@ -339,10 +339,15 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
           <span className="h-px flex-1 bg-gold/40" />
         </div>
 
+        <div
+          ref={googleButtonRef}
+          className={`${googleButtonReady ? "flex" : "hidden"} justify-center`}
+        />
+
         <button
           type="button"
           onClick={onGoogle}
-          className="label-caps inline-flex min-h-[48px] w-full items-center justify-center gap-3 rounded-full border border-input bg-background px-6 text-foreground transition-colors duration-200 ease-out hover:border-primary hover:text-primary"
+          className={`${googleButtonReady ? "hidden" : "inline-flex"} label-caps min-h-[48px] w-full items-center justify-center gap-3 rounded-full border border-input bg-background px-6 text-foreground transition-colors duration-200 ease-out hover:border-primary hover:text-primary`}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
             <path
