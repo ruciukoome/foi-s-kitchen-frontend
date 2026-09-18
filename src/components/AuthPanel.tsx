@@ -81,6 +81,8 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [sentConfirmation, setSentConfirmation] = useState(false);
   const [errors, setErrors] = useState<AuthFieldErrors>({});
   const oneTapStarted = useRef(false);
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+  const [googleButtonReady, setGoogleButtonReady] = useState(false);
 
   const isSignUp = mode === "sign-up";
   const mismatch = isSignUp && confirmPassword.length > 0 && confirmPassword !== password;
