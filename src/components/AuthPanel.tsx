@@ -339,10 +339,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
           <span className="h-px flex-1 bg-gold/40" />
         </div>
 
-        <div
-          ref={googleButtonRef}
-          className={`${googleButtonReady ? "flex" : "hidden"} justify-center`}
-        />
+        <div ref={googleButtonRef} className="flex w-full justify-center empty:hidden" />
 
         <button
           type="button"
