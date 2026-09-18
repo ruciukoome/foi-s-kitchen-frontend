@@ -39,10 +39,12 @@ function XIcon({ className }: { className?: string }) {
   );
 }
 
+export type SocialKey = "instagram" | "tiktok" | "facebook" | "x" | "youtube";
+
 type Platform = {
-  key: "instagram" | "tiktok" | "facebook" | "x" | "youtube";
+  key: SocialKey;
   label: string;
-  Icon: LucideIcon | ((p: { className?: string }) => JSX.Element);
+  Icon: ComponentType<{ className?: string }>;
   base: string;
 };
 
