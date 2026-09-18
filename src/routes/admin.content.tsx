@@ -501,6 +501,20 @@ function BusinessForm({
       <Field label="Google map embed link" className="md:col-span-2">
         <TextInput value={value.mapEmbed} onChange={(e) => setValue({ ...value, mapEmbed: e.target.value })} />
       </Field>
+      <p className="label-caps md:col-span-2 text-xs text-muted-foreground">
+        Social media — leave a box empty to hide that icon
+      </p>
+      {socialPlatforms.map((p) => (
+        <Field key={p.key} label={`${p.label} (link or @handle)`}>
+          <TextInput
+            value={value.socials?.[p.key] ?? ""}
+            placeholder={`${p.base}foiskitchen`}
+            onChange={(e) =>
+              setValue({ ...value, socials: { ...value.socials, [p.key]: e.target.value } })
+            }
+          />
+        </Field>
+      ))}
       <div className="md:col-span-2">
         <SaveButton saving={saving} label="Save contact details" />
       </div>
