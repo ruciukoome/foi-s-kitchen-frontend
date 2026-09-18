@@ -12,6 +12,7 @@ const defaults: BusinessInfo = {
   address: site.address,
   hours: site.hours,
   mapEmbed: site.mapEmbed,
+  socials: {},
 };
 
 const SiteInfoContext = createContext<BusinessInfo>(defaults);
