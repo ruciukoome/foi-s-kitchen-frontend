@@ -136,6 +136,25 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
             .finally(() => setBusy(false));
         },
       });
+      const buttonHost = googleButtonRef.current;
+      if (buttonHost) {
+        buttonHost.innerHTML = "";
+        try {
+          window.google.accounts.id.renderButton(buttonHost, {
+            type: "standard",
+            theme: "outline",
+            size: "large",
+            shape: "pill",
+            text: isSignUp ? "signup_with" : "signin_with",
+            logo_alignment: "left",
+            width: Math.min(Math.max(buttonHost.offsetWidth || 320, 200), 400),
+          });
+          if (buttonHost.childElementCount > 0) setGoogleButtonReady(true);
+        } catch {
+          setGoogleButtonReady(false);
+        }
+      }
+
       window.google.accounts.id.prompt();
     }
 
