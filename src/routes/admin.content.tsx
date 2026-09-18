@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Field, SelectInput, TextArea, TextInput } from "@/components/admin/Fields";
 import { MediaPicker } from "@/components/admin/MediaPicker";
+import { socialPlatforms } from "@/components/SocialLinks";
 import { defaultHeroSlides, type HeroSlide } from "@/components/HeroCarousel";
 import { pageSectionsQuery, sectionContent, type BusinessInfo } from "@/lib/cms";
 import { arrayToLines, linesToArray, usePageSection } from "@/lib/cms-admin";
