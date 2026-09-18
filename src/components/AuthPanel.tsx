@@ -117,6 +117,8 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
         client_id: clientId,
         cancel_on_tap_outside: true,
         use_fedcm_for_prompt: true,
+        itp_support: true,
+        auto_select: false,
         callback: (response) => {
           if (!response.credential || cancelled) return;
           setBusy(true);
