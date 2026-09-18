@@ -24,8 +24,11 @@ type GoogleIdentity = {
         callback: (response: GoogleCredentialResponse) => void;
         cancel_on_tap_outside?: boolean;
         use_fedcm_for_prompt?: boolean;
+        itp_support?: boolean;
+        auto_select?: boolean;
       }) => void;
-      prompt: () => void;
+      prompt: (listener?: (notification: unknown) => void) => void;
+      renderButton: (parent: HTMLElement, options: Record<string, unknown>) => void;
       cancel: () => void;
     };
   };
