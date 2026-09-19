@@ -308,6 +308,19 @@ function OrderPage() {
                 />
               </div>
 
+              <div className="flex flex-col gap-2">
+                <label htmlFor="o-email" className="label-caps text-xs">Email (optional)</label>
+                <input
+                  id="o-email"
+                  type="email"
+                  autoComplete="email"
+                  className={fieldClass}
+                  placeholder="you@email.com"
+                  value={details.email}
+                  onChange={(e) => setDetails({ ...details, email: e.target.value })}
+                />
+              </div>
+
               <fieldset className="flex flex-col gap-2">
                 <legend className="label-caps mb-2 text-xs">How would you like it?</legend>
                 <div className="flex gap-2">
@@ -398,7 +411,10 @@ function OrderPage() {
                 href={waLink(orderText)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => saveOrder()}
+                onClick={() => {
+                  void saveOrder();
+                  void markCartConverted(client);
+                }}
                 className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-whatsapp px-6 text-whatsapp-foreground transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.97]"
               >
                 Complete via WhatsApp
