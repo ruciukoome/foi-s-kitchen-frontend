@@ -61,7 +61,7 @@ function OrderPage() {
       address: d.address || profile.default_address || "",
     }));
     setPrefilled(true);
-  }, [profile, prefilled]);
+  }, [profile, prefilled, user]);
 
   async function saveOrder() {
     setDone(true);
@@ -269,6 +269,16 @@ function OrderPage() {
                   return;
                 }
                 setStep(2);
+                // Remember the cart so Foi can follow up if checkout stalls.
+                void saveCartSnapshot(client, {
+                  userId: user?.id ?? null,
+                  name: details.name,
+                  email: details.email,
+                  phone: details.phone,
+                  method: details.method,
+                  items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+                  total,
+                });
               }}
             >
               <div className="flex flex-col gap-2">
