@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { SocialLinks } from "@/components/SocialLinks";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { site, waLink } from "@/lib/site";
 import logo from "@/assets/logo.png";
 
@@ -15,6 +16,8 @@ export function SiteFooter() {
           </div>
           <p className="mt-3 max-w-xs text-sm opacity-80">{site.tagline}</p>
           <SocialLinks className="mt-5" itemClassName="border-background/25" />
+          <p className="label-caps mt-6 mb-2 text-primary">Get our specials</p>
+          <NewsletterSignup />
         </div>
 
         <nav className="text-sm" aria-label="Footer">
