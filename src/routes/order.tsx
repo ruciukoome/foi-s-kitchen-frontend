@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PageHero } from "@/components/PageHero";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { markCartConverted, saveCartSnapshot } from "@/lib/marketing";
 import { currency, site, waLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ function OrderPage() {
   const [details, setDetails] = useState({
     name: "",
     phone: "",
+    email: "",
     method: "Delivery",
     address: "",
     time: "",
@@ -54,6 +56,7 @@ function OrderPage() {
       ...d,
       name: d.name || profile.full_name || "",
       phone: d.phone || profile.phone || "",
+      email: d.email || user?.email || "",
       method: profile.default_method || d.method,
       address: d.address || profile.default_address || "",
     }));
