@@ -17,3 +17,11 @@
 - [x] Clear stale profile on account switch so customers are never routed to the admin dashboard
 - [x] Post-profile-save "Go to home page" option on My Account
 - [x] Column-level grants so customers cannot flip is_admin (needs re-run in Supabase SQL editor)
+
+## Marketing & abandoned carts (2026-09-19)
+- [x] docs/marketing-schema.sql — profiles.email + marketing_opt_in, admin read policy,
+      newsletter_subscribers, abandoned_carts (RLS + grants)
+- [x] Footer newsletter sign-up box
+- [x] Order page saves a cart snapshot at the Details step, marks it converted on WhatsApp
+- [x] /admin/marketing (contacts + CSV export) and /admin/carts (reminders)
+- [ ] Run docs/marketing-schema.sql in the Supabase SQL editor (blocked: needs Foi)

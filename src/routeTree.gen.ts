@@ -24,8 +24,10 @@ import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminCartsRouteImport } from './routes/admin.carts'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
+import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminMenuRouteImport } from './routes/admin.menu'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -110,6 +112,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCartsRoute = AdminCartsRouteImport.update({
+  id: '/admin/carts',
+  path: '/admin/carts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/admin/content',
   path: '/admin/content',
@@ -118,6 +125,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
 const AdminGalleryRoute = AdminGalleryRouteImport.update({
   id: '/admin/gallery',
   path: '/admin/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/admin/marketing',
+  path: '/admin/marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminMediaRoute = AdminMediaRouteImport.update({
@@ -175,8 +187,10 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menu': typeof AdminMenuRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -202,8 +216,10 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menu': typeof AdminMenuRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -230,8 +246,10 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menu': typeof AdminMenuRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -259,8 +277,10 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/account/orders'
+    | '/admin/carts'
     | '/admin/content'
     | '/admin/gallery'
+    | '/admin/marketing'
     | '/admin/media'
     | '/admin/menu'
     | '/admin/orders'
@@ -286,8 +306,10 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/account/orders'
+    | '/admin/carts'
     | '/admin/content'
     | '/admin/gallery'
+    | '/admin/marketing'
     | '/admin/media'
     | '/admin/menu'
     | '/admin/orders'
@@ -313,8 +335,10 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/account/orders'
+    | '/admin/carts'
     | '/admin/content'
     | '/admin/gallery'
+    | '/admin/marketing'
     | '/admin/media'
     | '/admin/menu'
     | '/admin/orders'
@@ -341,8 +365,10 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   AccountOrdersRoute: typeof AccountOrdersRoute
+  AdminCartsRoute: typeof AdminCartsRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminGalleryRoute: typeof AdminGalleryRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
   AdminMediaRoute: typeof AdminMediaRoute
   AdminMenuRoute: typeof AdminMenuRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
@@ -462,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/carts': {
+      id: '/admin/carts'
+      path: '/admin/carts'
+      fullPath: '/admin/carts'
+      preLoaderRoute: typeof AdminCartsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/admin/content'
@@ -474,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/gallery'
       fullPath: '/admin/gallery'
       preLoaderRoute: typeof AdminGalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/admin/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/media': {
@@ -549,8 +589,10 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   AccountOrdersRoute: AccountOrdersRoute,
+  AdminCartsRoute: AdminCartsRoute,
   AdminContentRoute: AdminContentRoute,
   AdminGalleryRoute: AdminGalleryRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
   AdminMediaRoute: AdminMediaRoute,
   AdminMenuRoute: AdminMenuRoute,
   AdminOrdersRoute: AdminOrdersRoute,

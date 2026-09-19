@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PageHero } from "@/components/PageHero";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { markCartConverted, saveCartSnapshot } from "@/lib/marketing";
 import { currency, site, waLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ function OrderPage() {
   const [details, setDetails] = useState({
     name: "",
     phone: "",
+    email: "",
     method: "Delivery",
     address: "",
     time: "",
@@ -54,11 +56,12 @@ function OrderPage() {
       ...d,
       name: d.name || profile.full_name || "",
       phone: d.phone || profile.phone || "",
+      email: d.email || user?.email || "",
       method: profile.default_method || d.method,
       address: d.address || profile.default_address || "",
     }));
     setPrefilled(true);
-  }, [profile, prefilled]);
+  }, [profile, prefilled, user]);
 
   async function saveOrder() {
     setDone(true);
@@ -266,6 +269,16 @@ function OrderPage() {
                   return;
                 }
                 setStep(2);
+                // Remember the cart so Foi can follow up if checkout stalls.
+                void saveCartSnapshot(client, {
+                  userId: user?.id ?? null,
+                  name: details.name,
+                  email: details.email,
+                  phone: details.phone,
+                  method: details.method,
+                  items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+                  total,
+                });
               }}
             >
               <div className="flex flex-col gap-2">
@@ -292,6 +305,19 @@ function OrderPage() {
                   value={details.phone}
                   onChange={(e) => setDetails({ ...details, phone: e.target.value })}
                   required
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="o-email" className="label-caps text-xs">Email (optional)</label>
+                <input
+                  id="o-email"
+                  type="email"
+                  autoComplete="email"
+                  className={fieldClass}
+                  placeholder="you@email.com"
+                  value={details.email}
+                  onChange={(e) => setDetails({ ...details, email: e.target.value })}
                 />
               </div>
 
@@ -385,7 +411,10 @@ function OrderPage() {
                 href={waLink(orderText)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => saveOrder()}
+                onClick={() => {
+                  void saveOrder();
+                  void markCartConverted(client);
+                }}
                 className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-whatsapp px-6 text-whatsapp-foreground transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.97]"
               >
                 Complete via WhatsApp
