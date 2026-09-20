@@ -62,13 +62,41 @@ function AdminCartsPage() {
           {error}
         </p>
       )}
-      {!error && carts === null && <p className="text-muted-foreground">Loading…</p>}
-      {!error && carts?.length === 0 && (
+      {!error && ordered === null && <p className="text-muted-foreground">Loading…</p>}
+      {!error && ordered?.length === 0 && (
         <p className="text-muted-foreground">No carts waiting right now.</p>
       )}
 
+      {ordered && ordered.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="label-caps text-muted-foreground">Sort by time:</span>
+          <button
+            type="button"
+            onClick={() => setOldestFirst(false)}
+            className={`label-caps min-h-[44px] rounded-full px-4 transition-colors ${
+              oldestFirst
+                ? "border border-border hover:border-primary hover:text-primary"
+                : "bg-primary text-primary-foreground"
+            }`}
+          >
+            Freshest first
+          </button>
+          <button
+            type="button"
+            onClick={() => setOldestFirst(true)}
+            className={`label-caps min-h-[44px] rounded-full px-4 transition-colors ${
+              oldestFirst
+                ? "bg-primary text-primary-foreground"
+                : "border border-border hover:border-primary hover:text-primary"
+            }`}
+          >
+            Oldest first
+          </button>
+        </div>
+      )}
+
       <ul className="flex flex-col gap-3">
-        {carts?.map((c) => {
+        {ordered?.map((c) => {
           const message = reminderText(c);
           return (
             <li
@@ -77,7 +105,9 @@ function AdminCartsPage() {
             >
               <div className="min-w-0">
                 <p className="text-sm text-muted-foreground">
-                  Last active {timeAgo(c.last_active_at)}
+                  Last edited {exactTime(c.last_active_at)}
+                  <span aria-hidden="true"> · </span>
+                  {timeAgo(c.last_active_at)}
                 </p>
                 <p className="mt-1 font-display font-semibold">
                   {c.customer_name || "Unnamed visitor"}
