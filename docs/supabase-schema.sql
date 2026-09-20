@@ -125,11 +125,13 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, phone)
+  -- is_admin pinned to false on insert: new sign-ups are never admins.
+  insert into public.profiles (id, full_name, phone, is_admin)
   values (
     new.id,
     nullif(new.raw_user_meta_data ->> 'full_name', ''),
-    nullif(new.raw_user_meta_data ->> 'phone', '')
+    nullif(new.raw_user_meta_data ->> 'phone', ''),
+    false
   )
   on conflict (id) do nothing;
   return new;

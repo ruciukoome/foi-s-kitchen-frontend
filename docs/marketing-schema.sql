@@ -26,12 +26,15 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, phone, email)
+  -- is_admin is pinned to false on every sign-up so new customers can never
+  -- become admins by accident, even if the column default is ever changed.
+  insert into public.profiles (id, full_name, phone, email, is_admin)
   values (
     new.id,
     nullif(new.raw_user_meta_data ->> 'full_name', ''),
     nullif(new.raw_user_meta_data ->> 'phone', ''),
-    new.email
+    new.email,
+    false
   )
   on conflict (id) do update set email = excluded.email;
   return new;
