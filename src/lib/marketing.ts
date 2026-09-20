@@ -127,6 +127,17 @@ export function timeAgo(iso: string) {
   return `${Math.round(hours / 24)} day(s) ago`;
 }
 
+/** Exact local date/time, e.g. "Sun 21 Sep, 10:32". */
+export function exactTime(iso: string) {
+  return new Date(iso).toLocaleString("en-KE", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function reminderText(cart: CartRow) {
   const first = (cart.customer_name ?? "there").split(" ")[0];
   return [
