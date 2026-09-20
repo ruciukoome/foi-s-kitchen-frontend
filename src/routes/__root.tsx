@@ -145,6 +145,7 @@ function RootComponent() {
             </div>
             <WhatsAppFloatButton />
             <StickyOrderBar />
+            <CartSync />
             <Toaster position="top-center" />
           </CartProvider>
         </AuthProvider>
