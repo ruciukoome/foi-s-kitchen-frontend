@@ -6,6 +6,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { useAuth } from "@/lib/auth";
 import {
   cartSummary,
+  exactTime,
   reminderText,
   timeAgo,
   waNumberLink,
@@ -30,6 +31,7 @@ function AdminCartsPage() {
   const { client } = useAuth();
   const [carts, setCarts] = useState<CartRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [oldestFirst, setOldestFirst] = useState(false);
 
   useEffect(() => {
     if (!client) return;
@@ -48,6 +50,10 @@ function AdminCartsPage() {
       cancelled = true;
     };
   }, [client]);
+
+  const ordered = carts
+    ? (oldestFirst ? [...carts].reverse() : carts)
+    : null;
 
   return (
     <AdminShell title="Abandoned carts" note="Carts left behind — send a gentle nudge.">
