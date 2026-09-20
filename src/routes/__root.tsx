@@ -18,6 +18,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { WhatsAppFloatButton } from "@/components/WhatsAppFloatButton";
 import { StickyOrderBar } from "@/components/StickyOrderBar";
+import { CartSync } from "@/components/CartSync";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
