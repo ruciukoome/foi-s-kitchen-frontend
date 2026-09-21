@@ -2,6 +2,8 @@ import { queryOptions } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getSupabaseClient } from "@/integrations/supabase-external/client";
+import type { MediaType } from "@/lib/media";
+
 
 /* --------------------------------------------------------------- constants */
 
@@ -28,10 +30,18 @@ export type MediaAsset = {
   url: string;
   alt_text: string | null;
   label: string | null;
+  media_type?: MediaType | null;
+  poster_url?: string | null;
   uploaded_at?: string;
 };
 
-type ImageJoin = { url: string; alt_text: string | null } | null;
+type ImageJoin = {
+  url: string;
+  alt_text: string | null;
+  media_type?: MediaType | null;
+  poster_url?: string | null;
+} | null;
+
 
 export type MenuItemRow = {
   id: string;
