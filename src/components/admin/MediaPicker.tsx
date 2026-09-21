@@ -90,14 +90,19 @@ export function MediaPicker({
       <div className="flex items-center gap-3">
         <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-border bg-secondary/60">
           {preview ? (
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            isPlayable(guessMediaType(preview)) ? (
+              <Play className="h-5 w-5 fill-primary text-primary" strokeWidth={1.5} aria-hidden="true" />
+            ) : (
+              <img src={preview} alt="" className="h-full w-full object-cover" />
+            )
           ) : (
             <ImageIcon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
           )}
         </span>
         <button type="button" className={outlineButtonClass} onClick={() => setOpen(true)}>
-          {preview ? "Change photo" : "Choose photo"}
+          {preview ? "Change" : "Choose photo or video"}
         </button>
+
         {preview && onClear && (
           <button
             type="button"
