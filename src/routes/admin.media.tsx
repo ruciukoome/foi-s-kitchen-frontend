@@ -9,6 +9,8 @@ import { Field, TextInput } from "@/components/admin/Fields";
 import { MEDIA_BUCKET, uploadMedia } from "@/components/admin/MediaPicker";
 import { useAuth } from "@/lib/auth";
 import { mediaAssetsQuery, type MediaAsset } from "@/lib/cms";
+import { embedSrc, guessMediaType } from "@/lib/media";
+
 import { outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 
 export const Route = createFileRoute("/admin/media")({
