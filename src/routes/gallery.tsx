@@ -8,7 +8,9 @@ import { GalleryGrid } from "@/components/GalleryGrid";
 import { TestimonialCard } from "@/components/TestimonialCard";
 import { PrimaryLink } from "@/components/CtaButtons";
 import { SkeletonGrid } from "@/components/CmsState";
+import { ReviewSubmitForm } from "@/components/ReviewSubmitForm";
 import { galleryFilters, galleryItemsQuery, testimonialsQuery, type GalleryFilter } from "@/lib/cms";
+
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({
@@ -67,6 +69,11 @@ function GalleryPage() {
             <p className="label-caps text-primary">Reviews</p>
             <h2 className="mt-2 font-display text-[1.75rem] font-semibold md:text-[2rem]">What clients say</h2>
           </SectionReveal>
+
+          <div className="mt-6">
+            <ReviewSubmitForm />
+          </div>
+
 
           <div className="mt-8">
             {reviews.isLoading ? (
