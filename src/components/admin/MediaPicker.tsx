@@ -142,6 +142,8 @@ function MediaDialog({
   const { data, isLoading } = useQuery(mediaAssetsQuery);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
+  const [embedUrl, setEmbedUrl] = useState("");
+
   const fileInput = useRef<HTMLInputElement>(null);
 
   const items = useMemo(() => {
