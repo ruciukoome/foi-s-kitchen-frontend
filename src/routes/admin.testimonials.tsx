@@ -61,7 +61,7 @@ type Tab = "pending" | "approved" | "hidden";
 
 function AdminTestimonialsPage() {
   const { data, isLoading } = useQuery(allTestimonialsQuery);
-  const { save, remove } = useCmsTable("testimonials", allTestimonialsQuery.queryKey);
+  const { save, remove } = useCmsTable("testimonials", ["cms", "testimonials"]);
   const [adding, setAdding] = useState(false);
   const [tab, setTab] = useState<Tab>("pending");
 
