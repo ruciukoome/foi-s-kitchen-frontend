@@ -1,16 +1,17 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImageIcon, Upload, X } from "lucide-react";
+import { ImageIcon, Link2, Play, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth";
 import { mediaAssetsQuery, type MediaAsset } from "@/lib/cms";
+import { guessMediaType, isPlayable } from "@/lib/media";
 import { fieldClass, outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
 export const MEDIA_BUCKET = "media";
 
-/** Upload a file to the media bucket and record it in media_assets. */
+/** Upload a photo or video to the media bucket and record it in media_assets. */
 export async function uploadMedia(
   client: NonNullable<ReturnType<typeof useAuth>["client"]>,
   file: File,
@@ -25,14 +26,43 @@ export async function uploadMedia(
   if (uploadError) throw new Error(uploadError.message);
 
   const { data: pub } = client.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+  const mediaType = file.type.startsWith("video/") ? "video" : guessMediaType(file.name);
   const { data, error } = await client
     .from("media_assets")
-    .insert({ storage_path: path, url: pub.publicUrl, label: label || null, alt_text: altText || null })
+    .insert({
+      storage_path: path,
+      url: pub.publicUrl,
+      label: label || null,
+      alt_text: altText || null,
+      media_type: mediaType,
+    })
     .select("*")
     .single();
   if (error) throw new Error(error.message);
   return data as MediaAsset;
 }
+
+/** Record a TikTok / YouTube / Vimeo link as a playable media asset. */
+export async function addEmbedMedia(
+  client: NonNullable<ReturnType<typeof useAuth>["client"]>,
+  url: string,
+  label: string,
+): Promise<MediaAsset> {
+  const clean = url.trim();
+  const { data, error } = await client
+    .from("media_assets")
+    .insert({
+      storage_path: `embed:${clean}`,
+      url: clean,
+      label: label || "video",
+      media_type: "embed",
+    })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return data as MediaAsset;
+}
+
 
 /**
  * Thumbnail grid picker reused by every content editor.
