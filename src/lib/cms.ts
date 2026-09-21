@@ -92,6 +92,8 @@ export type MealPlanRow = {
   image?: ImageJoin;
 };
 
+export type TestimonialStatus = "pending" | "approved" | "hidden";
+
 export type TestimonialRow = {
   id: string;
   name: string;
@@ -100,8 +102,12 @@ export type TestimonialRow = {
   rating: number;
   photo_id: string | null;
   sort_order: number;
+  status?: TestimonialStatus;
+  submitted_by?: string | null;
+  created_at?: string;
   photo?: ImageJoin;
 };
+
 
 export type GalleryItemRow = {
   id: string;
