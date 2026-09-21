@@ -115,8 +115,9 @@ function GalleryForm({
       }}
     >
       <MediaPicker
-        label="Photo"
+        label="Photo or video"
         defaultLabel="gallery"
+
         value={{ id: value.image_id, ...(value.imageUrl ? { url: value.imageUrl } : {}) }}
         onSelect={(asset) => setValue((p) => ({ ...p, image_id: asset.id, imageUrl: asset.url }))}
         onClear={() => setValue((p) => ({ ...p, image_id: null, imageUrl: "" }))}

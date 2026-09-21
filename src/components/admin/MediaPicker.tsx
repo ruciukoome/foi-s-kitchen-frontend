@@ -1,16 +1,17 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImageIcon, Upload, X } from "lucide-react";
+import { ImageIcon, Link2, Play, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth";
 import { mediaAssetsQuery, type MediaAsset } from "@/lib/cms";
+import { guessMediaType, isPlayable } from "@/lib/media";
 import { fieldClass, outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
 export const MEDIA_BUCKET = "media";
 
-/** Upload a file to the media bucket and record it in media_assets. */
+/** Upload a photo or video to the media bucket and record it in media_assets. */
 export async function uploadMedia(
   client: NonNullable<ReturnType<typeof useAuth>["client"]>,
   file: File,
@@ -25,14 +26,43 @@ export async function uploadMedia(
   if (uploadError) throw new Error(uploadError.message);
 
   const { data: pub } = client.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+  const mediaType = file.type.startsWith("video/") ? "video" : guessMediaType(file.name);
   const { data, error } = await client
     .from("media_assets")
-    .insert({ storage_path: path, url: pub.publicUrl, label: label || null, alt_text: altText || null })
+    .insert({
+      storage_path: path,
+      url: pub.publicUrl,
+      label: label || null,
+      alt_text: altText || null,
+      media_type: mediaType,
+    })
     .select("*")
     .single();
   if (error) throw new Error(error.message);
   return data as MediaAsset;
 }
+
+/** Record a TikTok / YouTube / Vimeo link as a playable media asset. */
+export async function addEmbedMedia(
+  client: NonNullable<ReturnType<typeof useAuth>["client"]>,
+  url: string,
+  label: string,
+): Promise<MediaAsset> {
+  const clean = url.trim();
+  const { data, error } = await client
+    .from("media_assets")
+    .insert({
+      storage_path: `embed:${clean}`,
+      url: clean,
+      label: label || "video",
+      media_type: "embed",
+    })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return data as MediaAsset;
+}
+
 
 /**
  * Thumbnail grid picker reused by every content editor.
@@ -60,14 +90,19 @@ export function MediaPicker({
       <div className="flex items-center gap-3">
         <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-border bg-secondary/60">
           {preview ? (
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            isPlayable(guessMediaType(preview)) ? (
+              <Play className="h-5 w-5 fill-primary text-primary" strokeWidth={1.5} aria-hidden="true" />
+            ) : (
+              <img src={preview} alt="" className="h-full w-full object-cover" />
+            )
           ) : (
             <ImageIcon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
           )}
         </span>
         <button type="button" className={outlineButtonClass} onClick={() => setOpen(true)}>
-          {preview ? "Change photo" : "Choose photo"}
+          {preview ? "Change" : "Choose photo or video"}
         </button>
+
         {preview && onClear && (
           <button
             type="button"
@@ -107,6 +142,8 @@ function MediaDialog({
   const { data, isLoading } = useQuery(mediaAssetsQuery);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
+  const [embedUrl, setEmbedUrl] = useState("");
+
   const fileInput = useRef<HTMLInputElement>(null);
 
   const items = useMemo(() => {
@@ -126,13 +163,30 @@ function MediaDialog({
         await uploadMedia(client, file, defaultLabel, "");
       }
       await queryClient.invalidateQueries({ queryKey: ["cms", "media_assets"] });
-      toast.success("Photo uploaded.");
+      toast.success("Uploaded.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setBusy(false);
     }
   }
+
+  async function handleEmbed() {
+    if (!client || !embedUrl.trim()) return;
+    setBusy(true);
+    try {
+      const asset = await addEmbedMedia(client, embedUrl, defaultLabel || "video");
+      await queryClient.invalidateQueries({ queryKey: ["cms", "media_assets"] });
+      setEmbedUrl("");
+      toast.success("Video link added.");
+      onPick(asset);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not add that link");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   return (
     <div
@@ -144,7 +198,7 @@ function MediaDialog({
     >
       <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border border-border bg-card sm:rounded-2xl">
         <div className="flex items-center justify-between gap-3 border-b border-border p-4">
-          <p className="font-display text-lg font-semibold">Photo library</p>
+          <p className="font-display text-lg font-semibold">Photo & video library</p>
           <button type="button" onClick={onClose} aria-label="Close" className="p-2">
             <X className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -156,12 +210,12 @@ function MediaDialog({
             placeholder="Filter by label, e.g. menu"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-label="Filter photos"
+            aria-label="Filter photos and videos"
           />
           <input
             ref={fileInput}
             type="file"
-            accept="image/*"
+            accept="image/*,video/mp4,video/webm,video/quicktime"
             multiple
             className="hidden"
             onChange={(e) => void handleFiles(e.target.files)}
@@ -177,35 +231,67 @@ function MediaDialog({
           </button>
         </div>
 
+        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row">
+          <input
+            className={fieldClass}
+            placeholder="Paste a TikTok, YouTube or Vimeo link"
+            value={embedUrl}
+            onChange={(e) => setEmbedUrl(e.target.value)}
+            aria-label="Video link"
+          />
+          <button
+            type="button"
+            disabled={busy || !embedUrl.trim()}
+            className={cn(outlineButtonClass, "shrink-0")}
+            onClick={() => void handleEmbed()}
+          >
+            <Link2 className="mr-2 h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+            Add video link
+          </button>
+        </div>
+
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          {isLoading && <p className="text-muted-foreground">Loading photos…</p>}
+          {isLoading && <p className="text-muted-foreground">Loading library…</p>}
           {!isLoading && items.length === 0 && (
-            <p className="text-muted-foreground">No photos yet — upload one above.</p>
+            <p className="text-muted-foreground">Nothing here yet — upload a photo or video above.</p>
           )}
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-            {items.map((m) => (
-              <li key={m.id}>
-                <button
-                  type="button"
-                  onClick={() => onPick(m)}
-                  className="group block w-full overflow-hidden rounded-xl border border-border bg-background text-left transition-colors hover:border-primary"
-                >
-                  <span className="block aspect-square overflow-hidden bg-secondary/60">
-                    <img
-                      src={m.url}
-                      alt={m.alt_text ?? ""}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
-                    />
-                  </span>
-                  <span className="block truncate px-2 py-1.5 text-[11px] text-muted-foreground">
-                    {m.label ?? "—"}
-                  </span>
-                </button>
-              </li>
-            ))}
+            {items.map((m) => {
+              const type = m.media_type ?? guessMediaType(m.url);
+              return (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    onClick={() => onPick(m)}
+                    className="group block w-full overflow-hidden rounded-xl border border-border bg-background text-left transition-colors hover:border-primary"
+                  >
+                    <span className="relative block aspect-square overflow-hidden bg-secondary/60">
+                      {type === "image" || m.poster_url ? (
+                        <img
+                          src={m.poster_url || m.url}
+                          alt={m.alt_text ?? ""}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
+                        />
+                      ) : type === "video" ? (
+                        <video src={m.url} muted preload="metadata" className="h-full w-full object-cover" />
+                      ) : null}
+                      {isPlayable(type) && (
+                        <span className="absolute inset-0 grid place-items-center bg-foreground/25">
+                          <Play className="h-6 w-6 fill-card text-card" strokeWidth={1.5} aria-hidden="true" />
+                        </span>
+                      )}
+                    </span>
+                    <span className="block truncate px-2 py-1.5 text-[11px] text-muted-foreground">
+                      {m.label ?? "—"}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
+
       </div>
     </div>
   );

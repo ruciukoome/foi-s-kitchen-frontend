@@ -9,6 +9,8 @@ import { Field, TextInput } from "@/components/admin/Fields";
 import { MEDIA_BUCKET, uploadMedia } from "@/components/admin/MediaPicker";
 import { useAuth } from "@/lib/auth";
 import { mediaAssetsQuery, type MediaAsset } from "@/lib/cms";
+import { embedSrc, guessMediaType } from "@/lib/media";
+
 import { outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 
 export const Route = createFileRoute("/admin/media")({
@@ -66,7 +68,7 @@ function AdminMediaPage() {
         <input
           ref={fileInput}
           type="file"
-          accept="image/*"
+          accept="image/*,video/mp4,video/webm,video/quicktime"
           multiple
           className="hidden"
           onChange={(e) => void handleFiles(e.target.files)}
@@ -78,8 +80,9 @@ function AdminMediaPage() {
           onClick={() => fileInput.current?.click()}
         >
           <Upload className="mr-2 h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
-          {busy ? "Uploading…" : "Upload photos"}
+          {busy ? "Uploading…" : "Upload photos or videos"}
         </button>
+
       </div>
 
       {isLoading && <p className="text-muted-foreground">Loading photos…</p>}
@@ -131,11 +134,20 @@ function MediaRow({ asset }: { asset: MediaAsset }) {
     toast.success("Photo deleted.");
   }
 
+  const type = asset.media_type ?? guessMediaType(asset.url);
+
   return (
     <li className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
       <span className="block aspect-[4/3] overflow-hidden rounded-xl bg-secondary/60">
-        <img src={asset.url} alt={asset.alt_text ?? ""} loading="lazy" className="h-full w-full object-cover" />
+        {type === "image" ? (
+          <img src={asset.url} alt={asset.alt_text ?? ""} loading="lazy" className="h-full w-full object-cover" />
+        ) : type === "video" ? (
+          <video src={asset.url} controls preload="metadata" className="h-full w-full object-cover" />
+        ) : (
+          <iframe src={embedSrc(asset.url)} title={asset.label ?? "Video"} allowFullScreen className="h-full w-full" />
+        )}
       </span>
+
       <Field label="Label">
         <TextInput value={label} onChange={(e) => setLabel(e.target.value)} placeholder="menu, hero, wedding…" />
       </Field>
