@@ -195,10 +195,21 @@ export const mealPlansQuery = queryOptions({
   queryFn: () => select<MealPlanRow>("meal_plans", PLAN_COLUMNS),
 });
 
-export const testimonialsQuery = queryOptions({
-  queryKey: ["cms", "testimonials"],
+/** Every review, including ones waiting for approval (admin only by RLS). */
+export const allTestimonialsQuery = queryOptions({
+  queryKey: ["cms", "testimonials", "all"],
   queryFn: () => select<TestimonialRow>("testimonials", TESTIMONIAL_COLUMNS),
 });
+
+/** Reviews shown on the public site — approved only. */
+export const testimonialsQuery = queryOptions({
+  queryKey: ["cms", "testimonials"],
+  queryFn: async () => {
+    const rows = await select<TestimonialRow>("testimonials", TESTIMONIAL_COLUMNS);
+    return rows.filter((r) => (r.status ?? "approved") === "approved");
+  },
+});
+
 
 export const galleryItemsQuery = queryOptions({
   queryKey: ["cms", "gallery_items"],
