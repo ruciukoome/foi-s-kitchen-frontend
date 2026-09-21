@@ -198,7 +198,7 @@ function MediaDialog({
     >
       <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border border-border bg-card sm:rounded-2xl">
         <div className="flex items-center justify-between gap-3 border-b border-border p-4">
-          <p className="font-display text-lg font-semibold">Photo library</p>
+          <p className="font-display text-lg font-semibold">Photo & video library</p>
           <button type="button" onClick={onClose} aria-label="Close" className="p-2">
             <X className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -210,12 +210,12 @@ function MediaDialog({
             placeholder="Filter by label, e.g. menu"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-label="Filter photos"
+            aria-label="Filter photos and videos"
           />
           <input
             ref={fileInput}
             type="file"
-            accept="image/*"
+            accept="image/*,video/mp4,video/webm,video/quicktime"
             multiple
             className="hidden"
             onChange={(e) => void handleFiles(e.target.files)}
@@ -231,35 +231,67 @@ function MediaDialog({
           </button>
         </div>
 
+        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row">
+          <input
+            className={fieldClass}
+            placeholder="Paste a TikTok, YouTube or Vimeo link"
+            value={embedUrl}
+            onChange={(e) => setEmbedUrl(e.target.value)}
+            aria-label="Video link"
+          />
+          <button
+            type="button"
+            disabled={busy || !embedUrl.trim()}
+            className={cn(outlineButtonClass, "shrink-0")}
+            onClick={() => void handleEmbed()}
+          >
+            <Link2 className="mr-2 h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+            Add video link
+          </button>
+        </div>
+
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          {isLoading && <p className="text-muted-foreground">Loading photos…</p>}
+          {isLoading && <p className="text-muted-foreground">Loading library…</p>}
           {!isLoading && items.length === 0 && (
-            <p className="text-muted-foreground">No photos yet — upload one above.</p>
+            <p className="text-muted-foreground">Nothing here yet — upload a photo or video above.</p>
           )}
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-            {items.map((m) => (
-              <li key={m.id}>
-                <button
-                  type="button"
-                  onClick={() => onPick(m)}
-                  className="group block w-full overflow-hidden rounded-xl border border-border bg-background text-left transition-colors hover:border-primary"
-                >
-                  <span className="block aspect-square overflow-hidden bg-secondary/60">
-                    <img
-                      src={m.url}
-                      alt={m.alt_text ?? ""}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
-                    />
-                  </span>
-                  <span className="block truncate px-2 py-1.5 text-[11px] text-muted-foreground">
-                    {m.label ?? "—"}
-                  </span>
-                </button>
-              </li>
-            ))}
+            {items.map((m) => {
+              const type = m.media_type ?? guessMediaType(m.url);
+              return (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    onClick={() => onPick(m)}
+                    className="group block w-full overflow-hidden rounded-xl border border-border bg-background text-left transition-colors hover:border-primary"
+                  >
+                    <span className="relative block aspect-square overflow-hidden bg-secondary/60">
+                      {type === "image" || m.poster_url ? (
+                        <img
+                          src={m.poster_url || m.url}
+                          alt={m.alt_text ?? ""}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
+                        />
+                      ) : type === "video" ? (
+                        <video src={m.url} muted preload="metadata" className="h-full w-full object-cover" />
+                      ) : null}
+                      {isPlayable(type) && (
+                        <span className="absolute inset-0 grid place-items-center bg-foreground/25">
+                          <Play className="h-6 w-6 fill-card text-card" strokeWidth={1.5} aria-hidden="true" />
+                        </span>
+                      )}
+                    </span>
+                    <span className="block truncate px-2 py-1.5 text-[11px] text-muted-foreground">
+                      {m.label ?? "—"}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
+
       </div>
     </div>
   );
