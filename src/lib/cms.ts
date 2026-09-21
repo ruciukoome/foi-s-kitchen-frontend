@@ -171,7 +171,9 @@ const SERVICE_COLUMNS = "*, image:media_assets!services_image_id_fkey(url, alt_t
 const TIER_COLUMNS = "*, image:media_assets!service_tiers_image_id_fkey(url, alt_text)";
 const PLAN_COLUMNS = "*, image:media_assets!meal_plans_image_id_fkey(url, alt_text)";
 const TESTIMONIAL_COLUMNS = "*, photo:media_assets!testimonials_photo_id_fkey(url, alt_text)";
-const GALLERY_COLUMNS = "*, image:media_assets!gallery_items_image_id_fkey(url, alt_text)";
+const GALLERY_COLUMNS =
+  "*, image:media_assets!gallery_items_image_id_fkey(url, alt_text, media_type, poster_url)";
+
 
 export const menuItemsQuery = queryOptions({
   queryKey: ["cms", "menu_items"],
