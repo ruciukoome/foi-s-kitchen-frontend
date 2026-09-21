@@ -163,13 +163,30 @@ function MediaDialog({
         await uploadMedia(client, file, defaultLabel, "");
       }
       await queryClient.invalidateQueries({ queryKey: ["cms", "media_assets"] });
-      toast.success("Photo uploaded.");
+      toast.success("Uploaded.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setBusy(false);
     }
   }
+
+  async function handleEmbed() {
+    if (!client || !embedUrl.trim()) return;
+    setBusy(true);
+    try {
+      const asset = await addEmbedMedia(client, embedUrl, defaultLabel || "video");
+      await queryClient.invalidateQueries({ queryKey: ["cms", "media_assets"] });
+      setEmbedUrl("");
+      toast.success("Video link added.");
+      onPick(asset);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not add that link");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   return (
     <div
