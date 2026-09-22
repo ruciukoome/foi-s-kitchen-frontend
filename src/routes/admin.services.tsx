@@ -16,7 +16,7 @@ import {
   type ServiceTierRow,
 } from "@/lib/cms";
 import { arrayToLines, linesToArray, useCmsTable, usePageSection } from "@/lib/cms-admin";
-import { serviceIntroDefaults, type ServiceIntro } from "@/routes/services";
+import { serviceIntroDefaults, type ServiceIntro } from "@/components/ServicesView";
 import { outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 
 export const Route = createFileRoute("/admin/services")({
