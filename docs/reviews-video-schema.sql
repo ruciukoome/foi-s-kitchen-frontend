@@ -43,3 +43,10 @@ exception when duplicate_object then null;
 end $$;
 
 notify pgrst, 'reload schema';
+
+-- ---------------------------------------------------------------------------
+-- FIX (run this): the public read policy calls public.is_admin(), so anonymous
+-- visitors need EXECUTE on it. Without this grant every signed-out visitor gets
+-- "permission denied for function is_admin" and sees no reviews at all.
+-- ---------------------------------------------------------------------------
+grant execute on function public.is_admin(uuid) to anon, authenticated;
