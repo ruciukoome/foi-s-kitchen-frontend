@@ -141,6 +141,11 @@ export function HeroCarousel() {
           aria-hidden="true"
           width={1600}
           height={1008}
+          // First slide is the LCP element: load it eagerly at high priority,
+          // the rest lazily so they don't compete for bandwidth.
+          loading={i === 0 ? "eager" : "lazy"}
+          fetchPriority={i === 0 ? "high" : "low"}
+          decoding={i === 0 ? "sync" : "async"}
           className={cn(
             "absolute inset-0 h-full w-full object-cover transition-opacity duration-[420ms] ease-out",
             i === active ? "opacity-100" : "opacity-0",
