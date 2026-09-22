@@ -9,6 +9,7 @@ import founder from "@/assets/founder.jpg";
 import kitchen1 from "@/assets/kitchen-1.jpg";
 import kitchen2 from "@/assets/kitchen-2.jpg";
 import { jsonLd, localBusinessSchema, pageSeo } from "@/lib/seo";
+import { ServiceArea } from "@/components/ServiceArea";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -165,6 +166,14 @@ function AboutPage() {
               </SectionReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="pb-12 md:pb-16">
+        <div className="container-page">
+          <SectionReveal>
+            <ServiceArea />
+          </SectionReveal>
         </div>
       </section>
 

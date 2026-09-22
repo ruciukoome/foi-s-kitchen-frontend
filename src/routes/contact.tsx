@@ -5,6 +5,7 @@ import { SectionReveal } from "@/components/SectionReveal";
 import { ContactForm } from "@/components/ContactForm";
 import { WhatsAppLink } from "@/components/CtaButtons";
 import { SocialLinks } from "@/components/SocialLinks";
+import { ServiceArea } from "@/components/ServiceArea";
 import { site } from "@/lib/site";
 import { jsonLd, localBusinessSchema, pageSeo } from "@/lib/seo";
 
@@ -74,6 +75,8 @@ function ContactPage() {
               <span className="label-caps block text-xs text-muted-foreground">Follow us</span>
               <SocialLinks className="mt-2" itemClassName="border-border" />
             </div>
+
+            <ServiceArea />
 
             <iframe
               title="Foi's Kitchen location"
