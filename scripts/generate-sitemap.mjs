@@ -8,9 +8,9 @@
  */
 import { writeFileSync } from "node:fs";
 
-const SITE_URL = (process.env["VITE_SITE_URL"] ?? "https://foiskitchen.netlify.app").replace(/\/$/, "");
+const SITE_URL = (process.env.VITE_SITE_URL ?? "https://foiskitchen.netlify.app").replace(/\/$/, "");
 
-const routes: { path: string; changefreq: string; priority: string }[] = [
+const routes = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/menu", changefreq: "weekly", priority: "0.9" },
   { path: "/order", changefreq: "weekly", priority: "0.9" },
