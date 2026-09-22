@@ -4,21 +4,24 @@ import { SectionReveal } from "@/components/SectionReveal";
 import { QuoteForm } from "@/components/QuoteForm";
 import { WhatsAppLink } from "@/components/CtaButtons";
 import { site } from "@/lib/site";
+import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/quote")({
   head: () => ({
-    meta: [
-      { title: "Request a Quotation — Foi's Kitchen Nairobi" },
-      {
-        name: "description",
-        content:
-          "Tell us about your event and get a catering quotation from Foi's Kitchen the same day. Weddings, corporate and private parties in Nairobi.",
-      },
-      { property: "og:title", content: "Request a Quotation — Foi's Kitchen" },
-      {
-        property: "og:description",
-        content: "Send your event details and get a same-day catering quote.",
-      },
+    ...pageSeo({
+      title: "Request a Catering Quotation in Nairobi | Foi's Kitchen",
+      description:
+        "Tell us about your event and get a catering quotation the same day — weddings, corporate lunches and private parties in Nairobi.",
+      path: "/quote",
+      image: "weddings",
+    }),
+    scripts: [
+      jsonLd(
+        breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Request a quotation", path: "/quote" },
+        ]),
+      ),
     ],
   }),
   component: QuotePage,
