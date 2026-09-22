@@ -9,6 +9,7 @@ import { SkeletonGrid } from "@/components/CmsState";
 import { dietTags, menuCategories, menuItemsQuery, type DietTag, type MenuCategory } from "@/lib/cms";
 import { useCart } from "@/lib/cart";
 import { cn } from "@/lib/utils";
+import { breadcrumbSchema, jsonLd, menuSchema, pageSeo } from "@/lib/seo";
 
 const searchSchema = z.object({
   category: z.enum(menuCategories).optional(),
@@ -16,16 +17,48 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/menu")({
   validateSearch: searchSchema,
-  head: () => ({
-    meta: [
-      { title: "Menu — Foi's Kitchen Nairobi" },
-      { name: "description", content: "Breakfast, mains, sides and desserts from Foi's Kitchen. Browse prices, add to your order and check out on WhatsApp." },
-      { property: "og:title", content: "Menu — Foi's Kitchen Nairobi" },
-      { property: "og:description", content: "Browse the full Foi's Kitchen menu and add dishes to your order." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  // Menu rows come from the Supabase CMS, not a hardcoded list — loading them
+  // here means the Menu/MenuItem markup is server-rendered for crawlers.
+  loader: async ({ context }) => {
+    try {
+      const rows = await context.queryClient.ensureQueryData(menuItemsQuery);
+      return {
+        items: rows
+          .filter((row) => row.is_available)
+          .map((row) => ({
+            name: row.name,
+            description: row.description,
+            price: Number(row.price),
+            category: row.category as string,
+            image: row.image?.url ?? undefined,
+          })),
+      };
+    } catch {
+      return { items: [] };
+    }
+  },
+  head: ({ loaderData }) => {
+    const seo = pageSeo({
+      title: "Menu & Prices | Foi's Kitchen Nairobi",
+      description:
+        "Breakfast, mains, sides and desserts cooked fresh in Nairobi. Browse prices, add dishes to your order and check out on WhatsApp.",
+      path: "/menu",
+      image: "menu",
+    });
+    const items = loaderData?.items ?? [];
+    return {
+      ...seo,
+      scripts: [
+        ...(items.length > 0 ? [jsonLd(menuSchema(items, menuCategories))] : []),
+        jsonLd(
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Menu", path: "/menu" },
+          ]),
+        ),
+      ],
+    };
+  },
   component: MenuPage,
 });
 
