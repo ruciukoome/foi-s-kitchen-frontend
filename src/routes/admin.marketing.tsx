@@ -18,6 +18,7 @@ export const Route = createFileRoute("/admin/marketing")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Customer Contacts — Foi's Kitchen" },
       { name: "description", content: "Customer emails and newsletter sign-ups for Foi's Kitchen." },
       { property: "og:title", content: "Customer Contacts — Foi's Kitchen" },

@@ -23,6 +23,7 @@ export const Route = createFileRoute("/admin/services")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Services Editor — Foi's Kitchen Admin" },
       { name: "description", content: "Edit the three service tabs, their intro text and pricing cards." },
       { property: "og:title", content: "Services Editor — Foi's Kitchen Admin" },

@@ -25,6 +25,7 @@ export const Route = createFileRoute("/admin/content")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Page Text — Foi's Kitchen Admin" },
       { name: "description", content: "Edit the words and photos on the Home and About pages, plus contact details." },
       { property: "og:title", content: "Page Text — Foi's Kitchen Admin" },

@@ -14,6 +14,7 @@ export const Route = createFileRoute("/admin/menu")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Menu Editor — Foi's Kitchen Admin" },
       { name: "description", content: "Add dishes, prices, photos and dietary tags." },
       { property: "og:title", content: "Menu Editor — Foi's Kitchen Admin" },

@@ -13,6 +13,7 @@ export const Route = createFileRoute("/admin/gallery")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Gallery Editor — Foi's Kitchen Admin" },
       { name: "description", content: "Manage the photo gallery and its categories." },
       { property: "og:title", content: "Gallery Editor — Foi's Kitchen Admin" },

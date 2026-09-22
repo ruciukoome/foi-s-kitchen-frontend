@@ -7,6 +7,7 @@ export const Route = createFileRoute("/sign-up")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Create an Account — Foi's Kitchen Nairobi" },
       {
         name: "description",

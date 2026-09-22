@@ -17,6 +17,7 @@ export const Route = createFileRoute("/admin/media")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Photo Library — Foi's Kitchen Admin" },
       { name: "description", content: "Upload and manage the photos used across the site." },
       { property: "og:title", content: "Photo Library — Foi's Kitchen Admin" },
