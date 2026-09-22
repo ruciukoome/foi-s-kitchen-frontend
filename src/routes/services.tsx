@@ -1,19 +1,14 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { z } from "zod";
 
-import { serviceCategories, type ServiceCategory } from "@/lib/cms";
-
-function isServiceCategory(value: unknown): value is ServiceCategory {
-  return typeof value === "string" && serviceCategories.some((category) => category === value);
-}
+import { serviceCategories } from "@/lib/cms";
 
 /**
  * Layout for the three service pages. Each category has its own crawlable URL
  * (/services/corporate, /services/weddings, /services/meal-prep); the legacy
- * /services?category=… links still work and redirect to the right page.
+ * /services?category=... links still work and redirect to the right page.
  */
 export const Route = createFileRoute("/services")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    category: isServiceCategory(search["category"]) ? search["category"] : "corporate",
-  }),
+  validateSearch: z.object({ category: z.enum(serviceCategories).optional() }),
   component: () => <Outlet />,
 });

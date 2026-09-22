@@ -30,7 +30,7 @@ export const Route = createFileRoute("/menu")({
             description: row.description,
             price: Number(row.price),
             category: row.category as string,
-            image: row.image?.url ?? undefined,
+            ...(row.image?.url ? { image: row.image.url } : {}),
           })),
       };
     } catch {
