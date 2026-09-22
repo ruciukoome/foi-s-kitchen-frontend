@@ -18,6 +18,7 @@ export const Route = createFileRoute("/admin/carts")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Abandoned Carts — Foi's Kitchen" },
       { name: "description", content: "Carts left behind, ready for a friendly reminder." },
       { property: "og:title", content: "Abandoned Carts — Foi's Kitchen" },

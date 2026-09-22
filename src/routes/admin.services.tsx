@@ -16,13 +16,14 @@ import {
   type ServiceTierRow,
 } from "@/lib/cms";
 import { arrayToLines, linesToArray, useCmsTable, usePageSection } from "@/lib/cms-admin";
-import { serviceIntroDefaults, type ServiceIntro } from "@/routes/services";
+import { serviceIntroDefaults, type ServiceIntro } from "@/components/ServicesView";
 import { outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 
 export const Route = createFileRoute("/admin/services")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Services Editor — Foi's Kitchen Admin" },
       { name: "description", content: "Edit the three service tabs, their intro text and pricing cards." },
       { property: "og:title", content: "Services Editor — Foi's Kitchen Admin" },

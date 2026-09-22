@@ -19,23 +19,36 @@ import {
 } from "@/lib/cms";
 import { iconFor } from "@/lib/icons";
 import { site } from "@/lib/site";
+import { jsonLd, localBusinessSchema, pageSeo, reviewSchema, websiteSchema } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Foi's Kitchen — Home-Style Catering & Meal Prep in Nairobi" },
-      {
-        name: "description",
-        content:
-          "Fresh home-style food for events, offices and your week. Order online or on WhatsApp — catering, meal prep plans and daily menus in Nairobi.",
-      },
-      { property: "og:title", content: "Foi's Kitchen — Home-Style Catering & Meal Prep in Nairobi" },
-      {
-        property: "og:description",
-        content: "Catering, meal prep plans and online food orders in Nairobi. Order in minutes.",
-      },
-    ],
-  }),
+  // Loads the approved reviews on the server so the rating markup is in the
+  // HTML crawlers receive (falls back to no review markup if the CMS is down).
+  loader: async ({ context }) => {
+    try {
+      const reviews = await context.queryClient.ensureQueryData(testimonialsQuery);
+      return { reviews: reviews.map((r) => ({ name: r.name, quote: r.quote, rating: r.rating, role: r.role })) };
+    } catch {
+      return { reviews: [] };
+    }
+  },
+  head: ({ loaderData }) => {
+    const seo = pageSeo({
+      title: "Catering & Meal Prep in Nairobi | Foi's Kitchen",
+      description:
+        "Home-style catering, weekly meal prep and online food orders across Nairobi. Order in minutes on WhatsApp — weddings, offices and families.",
+      path: "/",
+    });
+    const reviews = reviewSchema(loaderData?.reviews ?? []);
+    return {
+      ...seo,
+      scripts: [
+        jsonLd(localBusinessSchema()),
+        jsonLd(websiteSchema()),
+        ...(reviews ? [jsonLd(reviews)] : []),
+      ],
+    };
+  },
   component: HomePage,
 });
 

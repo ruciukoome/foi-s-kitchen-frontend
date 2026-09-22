@@ -22,7 +22,12 @@ export function GalleryGrid({ items }: { items: GalleryItemRow[] }) {
           const type = item.image?.media_type ?? "image";
           const playable = isPlayable(type);
           const poster = item.image?.poster_url || (type === "video" ? "" : imageOf(item));
-          const alt = altOf(item, item.caption ?? "Foi's Kitchen photo");
+          // Descriptive fallback alt text: the CMS alt text wins, then the
+          // caption, then a category-based description for SEO/screen readers.
+          const alt = altOf(
+            item,
+            item.caption ?? `${item.category} catering in Nairobi by Foi's Kitchen`,
+          );
 
           return (
             <figure

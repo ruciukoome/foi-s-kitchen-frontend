@@ -14,6 +14,7 @@ export const Route = createFileRoute("/admin/testimonials")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Reviews Editor — Foi's Kitchen Admin" },
       { name: "description", content: "Approve customer reviews and add your own." },
       { property: "og:title", content: "Reviews Editor — Foi's Kitchen Admin" },

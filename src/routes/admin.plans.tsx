@@ -13,6 +13,7 @@ export const Route = createFileRoute("/admin/plans")({
   ssr: false,
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Meal Plans Editor — Foi's Kitchen Admin" },
       { name: "description", content: "Edit the weekly meal prep plans." },
       { property: "og:title", content: "Meal Plans Editor — Foi's Kitchen Admin" },

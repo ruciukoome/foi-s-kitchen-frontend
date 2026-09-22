@@ -8,22 +8,19 @@ import { pageSectionsQuery, sectionContent } from "@/lib/cms";
 import founder from "@/assets/founder.jpg";
 import kitchen1 from "@/assets/kitchen-1.jpg";
 import kitchen2 from "@/assets/kitchen-2.jpg";
+import { jsonLd, localBusinessSchema, pageSeo } from "@/lib/seo";
+import { ServiceArea } from "@/components/ServiceArea";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
-    meta: [
-      { title: "About Foi's Kitchen — Our Story & Kitchen" },
-      {
-        name: "description",
-        content:
-          "Meet the cook behind Foi's Kitchen. Home-style Nairobi cooking, strict hygiene, and food made the way you'd make it at home.",
-      },
-      { property: "og:title", content: "About Foi's Kitchen — Our Story & Kitchen" },
-      {
-        property: "og:description",
-        content: "The story, the values and the kitchen behind Foi's Kitchen in Nairobi.",
-      },
-    ],
+    ...pageSeo({
+      title: "About Foi's Kitchen | Nairobi Home-Style Cooking",
+      description:
+        "Meet the cook behind Foi's Kitchen. Home-style Nairobi cooking, strict hygiene and food made the way you'd make it at home.",
+      path: "/about",
+      image: "about",
+    }),
+    scripts: [jsonLd(localBusinessSchema())],
   }),
   component: AboutPage,
 });
@@ -169,6 +166,14 @@ function AboutPage() {
               </SectionReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="pb-12 md:pb-16">
+        <div className="container-page">
+          <SectionReveal>
+            <ServiceArea />
+          </SectionReveal>
         </div>
       </section>
 

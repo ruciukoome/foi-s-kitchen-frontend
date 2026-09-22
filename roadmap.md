@@ -25,3 +25,13 @@
 - [x] Order page saves a cart snapshot at the Details step, marks it converted on WhatsApp
 - [x] /admin/marketing (contacts + CSV export) and /admin/carts (reminders)
 - [ ] Run docs/marketing-schema.sql in the Supabase SQL editor (blocked: needs Foi)
+
+## SEO (Sep 2026)
+- [x] Per-route title/description/OG/Twitter/canonical via `src/lib/seo.ts`
+- [x] JSON-LD: LocalBusiness/Restaurant, WebSite, Menu+MenuItem, Review+AggregateRating, Service, BreadcrumbList
+- [x] Dedicated service URLs: /services/corporate, /services/weddings, /services/meal-prep (legacy ?category= redirects)
+- [x] sitemap.xml generated at build (`npm run sitemap`), robots.txt disallows admin/account/auth
+- [x] noindex on admin, account and auth routes
+- [x] Service-area block on About + Contact; NAP consistent with CMS business details
+- [ ] Register sitemap in Google Search Console + create Google Business Profile
+- [ ] Add a precise street address in Admin → Page Text (improves local ranking)

@@ -8,22 +8,27 @@ import { useCart } from "@/lib/cart";
 import { markCartConverted, saveCartSnapshot } from "@/lib/marketing";
 import { currency, site, waLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
 
 
 export const Route = createFileRoute("/order")({
   head: () => ({
-    meta: [
-      { title: "Order Online — Foi's Kitchen Nairobi" },
-      {
-        name: "description",
-        content:
-          "Review your order, choose delivery or pickup and check out on WhatsApp. Fresh home-style food delivered across Nairobi.",
-      },
-      { property: "og:title", content: "Order Online — Foi's Kitchen Nairobi" },
-      {
-        property: "og:description",
-        content: "Build your order and finish it on WhatsApp in under a minute.",
-      },
+    // Canonical is the bare /order URL — cart/session query params must not
+    // create duplicate pages in the index.
+    ...pageSeo({
+      title: "Order Food Online in Nairobi | Foi's Kitchen",
+      description:
+        "Review your order, choose delivery or pickup and check out on WhatsApp. Fresh home-style food delivered across Nairobi.",
+      path: "/order",
+      image: "order",
+    }),
+    scripts: [
+      jsonLd(
+        breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Order online", path: "/order" },
+        ]),
+      ),
     ],
   }),
   component: OrderPage,
