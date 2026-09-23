@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 export function NewsletterSignup({ source = "footer" }: { source?: string }) {
   const { client } = useAuth();
   const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -14,6 +15,10 @@ export function NewsletterSignup({ source = "footer" }: { source?: string }) {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (!consent) {
+      toast.error("Please tick the box so we know it's okay to email you.");
       return;
     }
     if (!client) {
@@ -42,7 +47,7 @@ export function NewsletterSignup({ source = "footer" }: { source?: string }) {
   }
 
   return (
-    <form onSubmit={subscribe} className="flex flex-col gap-2 sm:flex-row">
+    <form onSubmit={subscribe} className="flex flex-col gap-2"><div className="flex flex-col gap-2 sm:flex-row">
       <label htmlFor="newsletter-email" className="sr-only">
         Email address
       </label>
