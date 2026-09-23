@@ -16,6 +16,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OrderRouteImport } from './routes/order'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuoteRouteImport } from './routes/quote'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -74,6 +75,11 @@ const MenuRoute = MenuRouteImport.update({
 const OrderRoute = OrderRouteImport.update({
   id: '/order',
   path: '/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuoteRoute = QuoteRouteImport.update({
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/gallery': typeof GalleryRoute
   '/menu': typeof MenuRoute
   '/order': typeof OrderRoute
+  '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRouteWithChildren
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/gallery': typeof GalleryRoute
   '/menu': typeof MenuRoute
   '/order': typeof OrderRoute
+  '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/gallery': typeof GalleryRoute
   '/menu': typeof MenuRoute
   '/order': typeof OrderRoute
+  '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRouteWithChildren
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/menu'
     | '/order'
+    | '/privacy'
     | '/quote'
     | '/reset-password'
     | '/services'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/menu'
     | '/order'
+    | '/privacy'
     | '/quote'
     | '/reset-password'
     | '/sign-in'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/menu'
     | '/order'
+    | '/privacy'
     | '/quote'
     | '/reset-password'
     | '/services'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   GalleryRoute: typeof GalleryRoute
   MenuRoute: typeof MenuRoute
   OrderRoute: typeof OrderRoute
+  PrivacyRoute: typeof PrivacyRoute
   QuoteRoute: typeof QuoteRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRouteWithChildren
@@ -476,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/order'
       fullPath: '/order'
       preLoaderRoute: typeof OrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quote': {
@@ -675,6 +695,7 @@ const rootRouteChildren: RootRouteChildren = {
   GalleryRoute: GalleryRoute,
   MenuRoute: MenuRoute,
   OrderRoute: OrderRoute,
+  PrivacyRoute: PrivacyRoute,
   QuoteRoute: QuoteRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRouteWithChildren,

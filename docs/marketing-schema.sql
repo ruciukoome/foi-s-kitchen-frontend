@@ -4,7 +4,23 @@
 -- --------------------------------------------- profiles: email + opt-in flag
 alter table public.profiles add column if not exists email text;
 alter table public.profiles
-  add column if not exists marketing_opt_in boolean not null default true;
+  add column if not exists marketing_opt_in boolean not null default false;
+
+-- Marketing consent must be an explicit choice, so the default is false and
+-- the sign-up form asks with an unticked box.
+alter table public.profiles alter column marketing_opt_in set default false;
+
+-- MIGRATION NOTE — MANUAL DECISION REQUIRED.
+-- Accounts created before this change were set to marketing_opt_in = true
+-- without ever being asked. This file does NOT touch them. Decide which of
+-- these you want, then run that one line yourself:
+--
+--   1) Leave them as they are (weakest position legally).
+--   2) Reset everyone and re-permission the list by email:
+--        update public.profiles set marketing_opt_in = false;
+--   3) Reset only accounts that never ordered:
+--        update public.profiles p set marketing_opt_in = false
+--        where not exists (select 1 from public.orders o where o.user_id = p.id);
 
 -- Customers may edit their own contact details and their opt-in preference,
 -- but never their email (it mirrors auth.users) or is_admin.
@@ -28,13 +44,14 @@ as $$
 begin
   -- is_admin is pinned to false on every sign-up so new customers can never
   -- become admins by accident, even if the column default is ever changed.
-  insert into public.profiles (id, full_name, phone, email, is_admin)
+  insert into public.profiles (id, full_name, phone, email, is_admin, marketing_opt_in)
   values (
     new.id,
     nullif(new.raw_user_meta_data ->> 'full_name', ''),
     nullif(new.raw_user_meta_data ->> 'phone', ''),
     new.email,
-    false
+    false,
+    coalesce((new.raw_user_meta_data ->> 'marketing_opt_in')::boolean, false)
   )
   on conflict (id) do update set email = excluded.email;
   return new;

@@ -79,6 +79,7 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [errors, setErrors] = useState<AuthFieldErrors>({});
   const oneTapStarted = useRef(false);
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
@@ -201,7 +202,10 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
         const { data, error } = await client.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { marketing_opt_in: marketingOptIn },
+          },
         });
         if (error) throw error;
         if (!data.session) {
@@ -312,6 +316,30 @@ export function AuthPanel({ mode }: { mode: "sign-in" | "sign-up" }) {
             />
           ) : null}
 
+          {isSignUp ? (
+            <label className="flex cursor-pointer items-start gap-3 py-1 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(e) => setMarketingOptIn(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>
+                Email me Foi's Kitchen specials, new menu items and offers. Unsubscribe any time.
+                We'll always email you about your own orders.
+              </span>
+            </label>
+          ) : null}
+
+          {isSignUp ? (
+            <p className="text-xs text-muted-foreground">
+              By creating an account you agree to how we handle your details in our{" "}
+              <Link to="/privacy" className="font-semibold text-primary hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          ) : null}
 
           {!isSignUp ? (
             <div className="-mt-1 text-right">
