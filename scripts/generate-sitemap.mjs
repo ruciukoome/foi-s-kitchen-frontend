@@ -21,6 +21,7 @@ const routes = [
   { path: "/gallery", changefreq: "weekly", priority: "0.7" },
   { path: "/about", changefreq: "monthly", priority: "0.6" },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
+  { path: "/privacy", changefreq: "yearly", priority: "0.3" },
 ];
 
 const lastmod = new Date().toISOString().slice(0, 10);
