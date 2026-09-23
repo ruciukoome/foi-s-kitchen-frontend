@@ -67,6 +67,18 @@ export function NewsletterSignup({ source = "footer" }: { source?: string }) {
       >
         {busy ? "Signing up…" : "Sign up"}
       </button>
+      </div>
+      <label className="flex cursor-pointer items-start gap-2 py-1 text-xs opacity-85">
+        <input
+          type="checkbox"
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+        />
+        <span>
+          Yes, email me Foi's Kitchen specials, new menu items and offers. Unsubscribe any time.
+        </span>
+      </label>
     </form>
   );
 }
