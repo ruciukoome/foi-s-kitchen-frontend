@@ -9,6 +9,7 @@ const links = [
   { to: "/admin/orders", label: "Orders" },
   { to: "/admin/carts", label: "Abandoned carts" },
   { to: "/admin/marketing", label: "Contacts" },
+  { to: "/admin/requests", label: "Data requests" },
   { to: "/admin/menu", label: "Menu" },
   { to: "/admin/services", label: "Services & tiers" },
   { to: "/admin/plans", label: "Meal plans" },
