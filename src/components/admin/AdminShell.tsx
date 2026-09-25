@@ -17,6 +17,7 @@ const links = [
   { to: "/admin/gallery", label: "Gallery" },
   { to: "/admin/content", label: "Page text" },
   { to: "/admin/media", label: "Photo library" },
+  { to: "/admin/settings", label: "Email settings" },
 ] as const;
 
 /** Shared admin chrome: admin-only gate + the one navigation list. */

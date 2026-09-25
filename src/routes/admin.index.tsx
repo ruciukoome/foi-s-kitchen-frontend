@@ -28,6 +28,7 @@ const cards = [
   { to: "/admin/gallery", title: "Gallery", body: "Manage the photo gallery and its categories." },
   { to: "/admin/content", title: "Page text", body: "Home and About copy, plus your contact details." },
   { to: "/admin/media", title: "Photo library", body: "Upload photos and manage labels and descriptions." },
+  { to: "/admin/settings", title: "Email settings", body: "Connect Resend and send a test email." },
 ] as const;
 
 function AdminHome() {

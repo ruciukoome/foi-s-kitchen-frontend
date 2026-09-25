@@ -37,3 +37,9 @@
 - [ ] Add a precise street address in Admin → Page Text (improves local ranking)
 
 - [x] Email option for orders/quotes via Resend (needs RESEND_API_KEY in Netlify env + verified domain; optional RESEND_FROM, ORDERS_INBOX)
+
+## Email / Resend
+- [x] Admin Email settings page (/admin/settings): paste Resend API key, stored in admin_settings table; test-email button
+- [x] Senders: orders@foiskitchen.com (orders), support@foiskitchen.com (quotes); env overrides RESEND_FROM_ORDERS / RESEND_FROM_SUPPORT / ORDERS_INBOX / RESEND_API_KEY
+- [ ] USER: run docs/email-settings-schema.sql in Supabase SQL editor
+- [ ] USER: verify foiskitchen.com domain in Resend (until then emails only reach the Resend account email)
