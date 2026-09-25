@@ -35,3 +35,5 @@
 - [x] Service-area block on About + Contact; NAP consistent with CMS business details
 - [ ] Register sitemap in Google Search Console + create Google Business Profile
 - [ ] Add a precise street address in Admin → Page Text (improves local ranking)
+
+- [x] Email option for orders/quotes via Resend (needs RESEND_API_KEY in Netlify env + verified domain; optional RESEND_FROM, ORDERS_INBOX)
