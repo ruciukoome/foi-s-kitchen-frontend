@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, CircleAlert, KeyRound, Mail, Send } from "lucide-react";
 
 import { AdminShell } from "@/components/admin/AdminShell";
-import { FormAlert } from "@/components/FormAlert";
 import { useAuth } from "@/lib/auth";
 import {
   getEmailSettings,
@@ -107,7 +106,7 @@ function AdminSettingsPage() {
 
   return (
     <AdminShell title="Email settings" note="Connect Resend so orders and quotations arrive by email.">
-      {loadError ? <FormAlert kind="error" message={loadError} /> : null}
+      {loadError ? <p role="alert" className="mb-4 rounded-xl bg-primary/10 px-4 py-3 text-sm text-primary">{loadError}</p> : null}
 
       {/* Connection status */}
       <section className="rounded-2xl border border-foreground/10 bg-card p-6">
@@ -168,7 +167,7 @@ function AdminSettingsPage() {
               className={fieldClass}
             />
           </label>
-          {saveMsg ? <FormAlert kind={saveMsg.kind === "ok" ? "success" : "error"} message={saveMsg.text} /> : null}
+          {saveMsg ? <p role="status" className={`rounded-xl px-4 py-3 text-sm ${saveMsg.kind === "ok" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>{saveMsg.text}</p> : null}
           <button type="submit" disabled={saving} className={primaryButtonClass}>
             {saving ? "Saving…" : "Save key"}
           </button>
@@ -201,7 +200,7 @@ function AdminSettingsPage() {
         </form>
         {testMsg ? (
           <div className="mt-3">
-            <FormAlert kind={testMsg.kind === "ok" ? "success" : "error"} message={testMsg.text} />
+            <p role="status" className="rounded-xl bg-primary/10 px-4 py-3 text-sm text-primary">{testMsg.text}</p>
           </div>
         ) : null}
       </section>
