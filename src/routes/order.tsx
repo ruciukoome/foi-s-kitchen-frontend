@@ -7,6 +7,8 @@ import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { markCartConverted, saveCartSnapshot } from "@/lib/marketing";
 import { currency, site, waLink } from "@/lib/site";
+import { useServerFn } from "@tanstack/react-start";
+import { sendOrderEmail } from "@/lib/email.functions";
 import { cn } from "@/lib/utils";
 import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
 
@@ -44,6 +46,10 @@ function OrderPage() {
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  const [sentVia, setSentVia] = useState<"email" | "whatsapp">("whatsapp");
+  const [orderRef, setOrderRef] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const sendOrder = useServerFn(sendOrderEmail);
   const [details, setDetails] = useState({
     name: "",
     phone: "",
@@ -85,9 +91,45 @@ function OrderPage() {
     });
     if (error) {
       console.error(error);
-      toast.error("We opened WhatsApp, but couldn't save the order for tracking.");
+      toast.error("Your order was sent, but we couldn't save it for tracking.");
     }
   }
+
+  async function sendByEmail() {
+    if (!/^\S+@\S+\.\S+$/.test(details.email)) {
+      toast.error("Please add your email so we can send you a copy.");
+      return;
+    }
+    setSendingEmail(true);
+    try {
+      const res = await sendOrder({
+        data: {
+          name: details.name,
+          phone: details.phone,
+          email: details.email,
+          method: details.method,
+          address: details.address || undefined,
+          time: details.time || undefined,
+          notes: details.notes || undefined,
+          items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+        },
+      });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      setOrderRef(res.reference);
+      setSentVia("email");
+      void saveOrder();
+      void markCartConverted(client);
+    } catch {
+      toast.error("Please check your details and try again.");
+    } finally {
+      setSendingEmail(false);
+    }
+  }
+
+
 
 
 
@@ -114,10 +156,18 @@ function OrderPage() {
             <Check className="h-8 w-8" strokeWidth={2} aria-hidden="true" />
           </span>
           <h1 className="mt-6 font-display text-3xl font-bold">Order sent</h1>
-          <p className="mt-3 text-muted-foreground">
-            We've opened WhatsApp with your order. Send the message and we'll confirm
-            the total and delivery time right away.
-          </p>
+          {sentVia === "email" ? (
+            <p className="mt-3 text-muted-foreground">
+              Got it — a copy is on its way to {details.email}. Your reference is{" "}
+              <strong className="text-primary">{orderRef}</strong>. We'll confirm the total
+              and delivery time shortly.
+            </p>
+          ) : (
+            <p className="mt-3 text-muted-foreground">
+              We've opened WhatsApp with your order. Send the message and we'll confirm
+              the total and delivery time right away.
+            </p>
+          )}
 
           {user && (
             <p className="mt-4 text-sm text-muted-foreground">
@@ -412,11 +462,34 @@ function OrderPage() {
                 </p>
               </div>
 
+              <div className="flex flex-col gap-2">
+                <label htmlFor="o-email-send" className="label-caps text-xs">Email for your order copy</label>
+                <input
+                  id="o-email-send"
+                  type="email"
+                  autoComplete="email"
+                  className="min-h-[48px] w-full rounded-xl border border-input bg-card px-4 py-3 text-base text-foreground outline-none transition-colors duration-200 ease-out focus:border-primary"
+                  placeholder="you@email.com"
+                  value={details.email}
+                  onChange={(e) => setDetails({ ...details, email: e.target.value })}
+                />
+              </div>
+
+              <button
+                type="button"
+                disabled={sendingEmail}
+                onClick={() => void sendByEmail()}
+                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-6 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
+              >
+                {sendingEmail ? "Sending…" : "Send order by email"}
+              </button>
+
               <a
                 href={waLink(orderText)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
+                  setSentVia("whatsapp");
                   void saveOrder();
                   void markCartConverted(client);
                 }}
