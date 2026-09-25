@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://foiskitchen.netlify.app/</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/menu</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/menu</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/order</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/order</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/services/corporate</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/services/corporate</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/services/weddings</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/services/weddings</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/services/meal-prep</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/services/meal-prep</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/quote</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/quote</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/gallery</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/gallery</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/about</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/about</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/contact</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/contact</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://foiskitchen.netlify.app/privacy</loc>
-    <lastmod>2026-09-23</lastmod>
+    <loc>https://foiskitchen.com/privacy</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
