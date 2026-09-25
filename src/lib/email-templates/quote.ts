@@ -6,10 +6,10 @@ export type QuoteEmailData = {
   email: string;
   context: string;
   eventType: string;
-  date?: string;
-  guests?: string;
-  budget?: string;
-  notes?: string;
+  date?: string | undefined;
+  guests?: string | undefined;
+  budget?: string | undefined;
+  notes?: string | undefined;
 };
 
 function table(d: QuoteEmailData) {

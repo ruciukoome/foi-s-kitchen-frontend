@@ -5,9 +5,9 @@ export type OrderEmailData = {
   phone: string;
   email: string;
   method: string;
-  address?: string;
-  time?: string;
-  notes?: string;
+  address?: string | undefined;
+  time?: string | undefined;
+  notes?: string | undefined;
   items: { name: string; qty: number; price: number }[];
 };
 
