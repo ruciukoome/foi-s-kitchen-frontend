@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { site } from "@/lib/site";
 import { quoteBusinessEmail, quoteCustomerEmail } from "@/lib/email-templates/quote";
 import { orderBusinessEmail, orderCustomerEmail } from "@/lib/email-templates/order";
 
@@ -69,7 +68,8 @@ async function sendResend(payload: {
   }
 }
 
-const inbox = () => process.env["ORDERS_INBOX"] || site.email;
+const ORDERS_INBOX = () => process.env["ORDERS_INBOX"] || "orders@foiskitchen.com";
+const QUOTES_INBOX = () => process.env["QUOTES_INBOX"] || "quotations@foiskitchen.com";
 
 const quoteSchema = z.object({
   name: short(120).min(1),
