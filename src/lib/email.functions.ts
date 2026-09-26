@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { site } from "@/lib/site";
 import { quoteBusinessEmail, quoteCustomerEmail } from "@/lib/email-templates/quote";
 import { orderBusinessEmail, orderCustomerEmail } from "@/lib/email-templates/order";
 
@@ -69,7 +68,8 @@ async function sendResend(payload: {
   }
 }
 
-const inbox = () => process.env["ORDERS_INBOX"] || site.email;
+const ORDERS_INBOX = () => process.env["ORDERS_INBOX"] || "orders@foiskitchen.com";
+const QUOTES_INBOX = () => process.env["QUOTES_INBOX"] || "quotations@foiskitchen.com";
 
 const quoteSchema = z.object({
   name: short(120).min(1),
@@ -90,7 +90,7 @@ export const sendQuoteEmail = createServerFn({ method: "POST" })
     const reference = makeReference("Q");
     try {
       await sendResend({
-        to: inbox(),
+        to: QUOTES_INBOX(),
         subject: `New quotation request — ${data.name} (${reference})`,
         html: quoteBusinessEmail(data, reference),
         from: SUPPORT_FROM(),
@@ -130,7 +130,7 @@ export const sendOrderEmail = createServerFn({ method: "POST" })
     const reference = makeReference("O");
     try {
       await sendResend({
-        to: inbox(),
+        to: ORDERS_INBOX(),
         subject: `New order — ${data.name} (${reference})`,
         html: orderBusinessEmail(data, reference),
         from: ORDERS_FROM(),
@@ -177,7 +177,8 @@ export type EmailSettings = {
   keyPreview: string | null;
   ordersFrom: string;
   supportFrom: string;
-  inbox: string;
+  ordersInbox: string;
+  quotesInbox: string;
 };
 
 export const getEmailSettings = createServerFn({ method: "POST" })
@@ -198,7 +199,8 @@ export const getEmailSettings = createServerFn({ method: "POST" })
       keyPreview: active ? `${active.slice(0, 7)}…${active.slice(-4)}` : null,
       ordersFrom: ORDERS_FROM(),
       supportFrom: SUPPORT_FROM(),
-      inbox: inbox(),
+      ordersInbox: ORDERS_INBOX(),
+      quotesInbox: QUOTES_INBOX(),
     };
   });
 

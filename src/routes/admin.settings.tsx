@@ -128,7 +128,7 @@ function AdminSettingsPage() {
           </div>
         </div>
         {settings ? (
-          <dl className="mt-5 grid gap-3 border-t border-gold/40 pt-5 text-sm sm:grid-cols-3">
+          <dl className="mt-5 grid gap-3 border-t border-gold/40 pt-5 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <dt className="label-caps text-foreground/60">Order emails from</dt>
               <dd className="mt-1 break-all">{settings.ordersFrom}</dd>
@@ -139,7 +139,11 @@ function AdminSettingsPage() {
             </div>
             <div>
               <dt className="label-caps text-foreground/60">New orders go to</dt>
-              <dd className="mt-1 break-all">{settings.inbox}</dd>
+              <dd className="mt-1 break-all">{settings.ordersInbox}</dd>
+            </div>
+            <div>
+              <dt className="label-caps text-foreground/60">New quotations go to</dt>
+              <dd className="mt-1 break-all">{settings.quotesInbox}</dd>
             </div>
           </dl>
         ) : null}
