@@ -323,7 +323,7 @@ async function seedSections() {
         phoneDisplay: "+254 758 996 440",
         phoneTel: "+254758996440",
         whatsapp: "254758996440",
-        email: "hello@foiskitchen.co.ke",
+        email: "support@foiskitchen.com",
         address: "Kilimani, Nairobi, Kenya",
         hours: [
           { day: "Mon – Fri", time: "7:00am – 8:00pm" },
