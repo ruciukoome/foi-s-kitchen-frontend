@@ -173,6 +173,40 @@ async function requireAdmin(accessToken: string) {
   return admin;
 }
 
+// ---------------------------------------------------------------------------
+// Admin: abandoned-cart reminder, sent from ivy@foiskitchen.com.
+// ---------------------------------------------------------------------------
+
+const cartReminderSchema = z.object({
+  accessToken: z.string().min(20),
+  to: z.string().trim().email().max(200),
+  name: short(120),
+  items: z
+    .array(z.object({ name: short(160).min(1), qty: z.number().int().min(1).max(500), price: z.number().min(0).max(1_000_000) }))
+    .min(1)
+    .max(60),
+  total: z.number().min(0).max(10_000_000),
+});
+
+export const sendCartReminderEmail = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => cartReminderSchema.parse(d))
+  .handler(async ({ data }): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      await requireAdmin(data.accessToken);
+      const reference = makeReference("O");
+      await sendResend({
+        to: data.to,
+        subject: "You left something delicious in your cart",
+        html: cartReminderEmail({ name: data.name || null, items: data.items, total: data.total, reference }),
+        from: IVY_FROM(),
+      });
+      return { ok: true };
+    } catch (e) {
+      console.error(e);
+      return { ok: false, error: e instanceof Error ? e.message : "The reminder email failed." };
+    }
+  });
+
 export type EmailSettings = {
   connected: boolean;
   source: "environment" | "dashboard" | null;
