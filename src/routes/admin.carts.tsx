@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Mail, MessageCircle } from "lucide-react";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAuth } from "@/lib/auth";
+import { sendCartReminderEmail } from "@/lib/email.functions";
 import {
   cartSummary,
   exactTime,
@@ -30,9 +32,39 @@ export const Route = createFileRoute("/admin/carts")({
 
 function AdminCartsPage() {
   const { client } = useAuth();
+  const sendReminder = useServerFn(sendCartReminderEmail);
   const [carts, setCarts] = useState<CartRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [oldestFirst, setOldestFirst] = useState(false);
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [sentIds, setSentIds] = useState<Set<string>>(new Set());
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  async function emailReminder(cart: CartRow) {
+    if (!client || !cart.customer_email) return;
+    setSendingId(cart.id);
+    setSendError(null);
+    try {
+      const { data } = await client.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Your sign-in has expired — please sign in again.");
+      const res = await sendReminder({
+        data: {
+          accessToken: token,
+          to: cart.customer_email,
+          name: cart.customer_name ?? "",
+          items: cart.items,
+          total: Number(cart.total),
+        },
+      });
+      if (!res.ok) throw new Error(res.error ?? "The reminder email failed.");
+      setSentIds((prev) => new Set(prev).add(cart.id));
+    } catch (e) {
+      setSendError(e instanceof Error ? e.message : "The reminder email failed.");
+    } finally {
+      setSendingId(null);
+    }
+  }
 
   useEffect(() => {
     if (!client) return;
