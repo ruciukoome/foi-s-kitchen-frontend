@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { quoteBusinessEmail, quoteCustomerEmail } from "@/lib/email-templates/quote";
 import { orderBusinessEmail, orderCustomerEmail } from "@/lib/email-templates/order";
+import { cartReminderEmail } from "@/lib/email-templates/cart-reminder";
 
 type Result = { ok: true; reference: string } | { ok: false; error: string };
 
@@ -17,6 +18,7 @@ function makeReference(kind: "Q" | "O") {
 /** Sender mailboxes. Env vars override these defaults. */
 const ORDERS_FROM = () => process.env["RESEND_FROM_ORDERS"] || `Foi's Kitchen <orders@foiskitchen.com>`;
 const SUPPORT_FROM = () => process.env["RESEND_FROM_SUPPORT"] || `Foi's Kitchen <support@foiskitchen.com>`;
+const IVY_FROM = () => process.env["RESEND_FROM_IVY"] || `Ivy — Foi's Kitchen <ivy@foiskitchen.com>`;
 
 /**
  * Resend API key resolution order:
