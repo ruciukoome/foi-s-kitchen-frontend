@@ -150,6 +150,8 @@ function RootComponent() {
             <StickyOrderBar />
             <CartSync />
             <CookieConsentBanner />
+            <GoogleOneTap />
+
             <Toaster position="top-center" />
           </CartProvider>
         </AuthProvider>
