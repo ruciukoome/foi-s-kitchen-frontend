@@ -14,7 +14,7 @@ import {
   waNumberLink,
   type CartRow,
 } from "@/lib/marketing";
-import { currency, site } from "@/lib/site";
+import { currency } from "@/lib/site";
 
 export const Route = createFileRoute("/admin/carts")({
   ssr: false,
