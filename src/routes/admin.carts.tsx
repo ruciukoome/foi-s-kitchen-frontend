@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Mail, MessageCircle } from "lucide-react";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAuth } from "@/lib/auth";
+import { sendCartReminderEmail } from "@/lib/email.functions";
 import {
   cartSummary,
   exactTime,
@@ -12,7 +14,7 @@ import {
   waNumberLink,
   type CartRow,
 } from "@/lib/marketing";
-import { currency, site } from "@/lib/site";
+import { currency } from "@/lib/site";
 
 export const Route = createFileRoute("/admin/carts")({
   ssr: false,
@@ -30,9 +32,39 @@ export const Route = createFileRoute("/admin/carts")({
 
 function AdminCartsPage() {
   const { client } = useAuth();
+  const sendReminder = useServerFn(sendCartReminderEmail);
   const [carts, setCarts] = useState<CartRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [oldestFirst, setOldestFirst] = useState(false);
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [sentIds, setSentIds] = useState<Set<string>>(new Set());
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  async function emailReminder(cart: CartRow) {
+    if (!client || !cart.customer_email) return;
+    setSendingId(cart.id);
+    setSendError(null);
+    try {
+      const { data } = await client.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Your sign-in has expired — please sign in again.");
+      const res = await sendReminder({
+        data: {
+          accessToken: token,
+          to: cart.customer_email,
+          name: cart.customer_name ?? "",
+          items: cart.items,
+          total: Number(cart.total),
+        },
+      });
+      if (!res.ok) throw new Error(res.error ?? "The reminder email failed.");
+      setSentIds((prev) => new Set(prev).add(cart.id));
+    } catch (e) {
+      setSendError(e instanceof Error ? e.message : "The reminder email failed.");
+    } finally {
+      setSendingId(null);
+    }
+  }
 
   useEffect(() => {
     if (!client) return;
@@ -61,6 +93,11 @@ function AdminCartsPage() {
       {error && (
         <p className="mb-4 rounded-2xl border border-destructive/40 bg-card p-5 text-sm text-destructive">
           {error}
+        </p>
+      )}
+      {sendError && (
+        <p className="mb-4 rounded-2xl border border-destructive/40 bg-card p-5 text-sm text-destructive">
+          {sendError}
         </p>
       )}
       {!error && ordered === null && <p className="text-muted-foreground">Loading…</p>}
@@ -136,15 +173,15 @@ function AdminCartsPage() {
                   </a>
                 )}
                 {c.customer_email && (
-                  <a
-                    href={`mailto:${c.customer_email}?subject=${encodeURIComponent(
-                      `Your ${site.name} order`,
-                    )}&body=${encodeURIComponent(message)}`}
-                    className="label-caps inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border px-4 transition-colors hover:border-primary hover:text-primary"
+                  <button
+                    type="button"
+                    disabled={sendingId === c.id || sentIds.has(c.id)}
+                    onClick={() => void emailReminder(c)}
+                    className="label-caps inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border px-4 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Mail className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
-                    Email
-                  </a>
+                    {sentIds.has(c.id) ? "Email sent" : sendingId === c.id ? "Sending…" : "Email"}
+                  </button>
                 )}
               </div>
             </li>
