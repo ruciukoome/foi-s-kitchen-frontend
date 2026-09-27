@@ -20,6 +20,8 @@ import { WhatsAppFloatButton } from "@/components/WhatsAppFloatButton";
 import { StickyOrderBar } from "@/components/StickyOrderBar";
 import { CartSync } from "@/components/CartSync";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { GoogleOneTap } from "@/components/GoogleOneTap";
+
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
