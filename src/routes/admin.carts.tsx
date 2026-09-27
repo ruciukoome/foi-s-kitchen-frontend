@@ -95,6 +95,11 @@ function AdminCartsPage() {
           {error}
         </p>
       )}
+      {sendError && (
+        <p className="mb-4 rounded-2xl border border-destructive/40 bg-card p-5 text-sm text-destructive">
+          {sendError}
+        </p>
+      )}
       {!error && ordered === null && <p className="text-muted-foreground">Loading…</p>}
       {!error && ordered?.length === 0 && (
         <p className="text-muted-foreground">No carts waiting right now.</p>
@@ -168,15 +173,15 @@ function AdminCartsPage() {
                   </a>
                 )}
                 {c.customer_email && (
-                  <a
-                    href={`mailto:${c.customer_email}?subject=${encodeURIComponent(
-                      `Your ${site.name} order`,
-                    )}&body=${encodeURIComponent(message)}`}
-                    className="label-caps inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border px-4 transition-colors hover:border-primary hover:text-primary"
+                  <button
+                    type="button"
+                    disabled={sendingId === c.id || sentIds.has(c.id)}
+                    onClick={() => void emailReminder(c)}
+                    className="label-caps inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border px-4 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Mail className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
-                    Email
-                  </a>
+                    {sentIds.has(c.id) ? "Email sent" : sendingId === c.id ? "Sending…" : "Email"}
+                  </button>
                 )}
               </div>
             </li>
