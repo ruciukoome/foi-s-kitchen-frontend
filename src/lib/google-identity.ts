@@ -1,3 +1,4 @@
+// Shared Google Identity Services loader and types.
 export type GoogleCredentialResponse = {
   credential?: string;
 };
