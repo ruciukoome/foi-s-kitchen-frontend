@@ -11,6 +11,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendOrderEmail } from "@/lib/email.functions";
 import { cn } from "@/lib/utils";
 import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
+import { TermsConsent } from "@/components/TermsConsent";
 
 
 export const Route = createFileRoute("/order")({
@@ -44,6 +45,8 @@ function OrderPage() {
   const { lines, total, setQty, remove, clear } = useCart();
   const { client, user, profile } = useAuth();
   const [step, setStep] = useState(0);
+  const [agreed, setAgreed] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [done, setDone] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
   const [sentVia, setSentVia] = useState<"email" | "whatsapp">("whatsapp");
@@ -475,10 +478,15 @@ function OrderPage() {
                 />
               </div>
 
+              <TermsConsent id="o-terms" checked={agreed} onChange={setAgreed} />
+
               <button
                 type="button"
                 disabled={sendingEmail}
-                onClick={() => void sendByEmail()}
+                onClick={() => {
+                  if (!agreed) return void toast.error("Please agree to the Terms and Refund Policy first.");
+                  void sendByEmail();
+                }}
                 className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-6 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
               >
                 {sendingEmail ? "Sending…" : "Send order by email"}
@@ -488,12 +496,21 @@ function OrderPage() {
                 href={waLink(orderText)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => {
+                aria-disabled={!agreed}
+                onClick={(e) => {
+                  if (!agreed) {
+                    e.preventDefault();
+                    toast.error("Please agree to the Terms and Refund Policy first.");
+                    return;
+                  }
                   setSentVia("whatsapp");
                   void saveOrder();
                   void markCartConverted(client);
                 }}
-                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-whatsapp px-6 text-whatsapp-foreground transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.97]"
+                className={cn(
+                  "label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-whatsapp px-6 text-whatsapp-foreground transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.97]",
+                  !agreed && "opacity-60",
+                )}
               >
                 Complete via WhatsApp
               </a>

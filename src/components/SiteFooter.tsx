@@ -29,6 +29,8 @@ export function SiteFooter() {
             <li><Link to="/gallery" className="hover:text-primary">Gallery &amp; Reviews</Link></li>
             <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
             <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
+            <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
+            <li><Link to="/refund-policy" className="hover:text-primary">Refund Policy</Link></li>
           </ul>
         </nav>
 
