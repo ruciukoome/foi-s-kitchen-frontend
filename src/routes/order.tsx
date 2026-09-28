@@ -45,6 +45,7 @@ function OrderPage() {
   const { lines, total, setQty, remove, clear } = useCart();
   const { client, user, profile } = useAuth();
   const [step, setStep] = useState(0);
+  const [agreed, setAgreed] = useState(false);
   const [done, setDone] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
   const [sentVia, setSentVia] = useState<"email" | "whatsapp">("whatsapp");

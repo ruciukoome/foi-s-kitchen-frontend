@@ -18,10 +18,12 @@ import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OrderRouteImport } from './routes/order'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuoteRouteImport } from './routes/quote'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -89,6 +91,11 @@ const QuoteRoute = QuoteRouteImport.update({
   path: '/quote',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -107,6 +114,11 @@ const SignInRoute = SignInRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountIndexRoute = AccountIndexRouteImport.update({
@@ -225,10 +237,12 @@ export interface FileRoutesByFullPath {
   '/order': typeof OrderRoute
   '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/terms': typeof TermsRoute
   '/account/orders': typeof AccountOrdersRoute
   '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
@@ -261,9 +275,11 @@ export interface FileRoutesByTo {
   '/order': typeof OrderRoute
   '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/terms': typeof TermsRoute
   '/account/orders': typeof AccountOrdersRoute
   '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
@@ -297,10 +313,12 @@ export interface FileRoutesById {
   '/order': typeof OrderRoute
   '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/terms': typeof TermsRoute
   '/account/orders': typeof AccountOrdersRoute
   '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
@@ -335,10 +353,12 @@ export interface FileRouteTypes {
     | '/order'
     | '/privacy'
     | '/quote'
+    | '/refund-policy'
     | '/reset-password'
     | '/services'
     | '/sign-in'
     | '/sign-up'
+    | '/terms'
     | '/account/orders'
     | '/admin/carts'
     | '/admin/content'
@@ -371,9 +391,11 @@ export interface FileRouteTypes {
     | '/order'
     | '/privacy'
     | '/quote'
+    | '/refund-policy'
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/terms'
     | '/account/orders'
     | '/admin/carts'
     | '/admin/content'
@@ -406,10 +428,12 @@ export interface FileRouteTypes {
     | '/order'
     | '/privacy'
     | '/quote'
+    | '/refund-policy'
     | '/reset-password'
     | '/services'
     | '/sign-in'
     | '/sign-up'
+    | '/terms'
     | '/account/orders'
     | '/admin/carts'
     | '/admin/content'
@@ -443,10 +467,12 @@ export interface RootRouteChildren {
   OrderRoute: typeof OrderRoute
   PrivacyRoute: typeof PrivacyRoute
   QuoteRoute: typeof QuoteRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  TermsRoute: typeof TermsRoute
   AccountOrdersRoute: typeof AccountOrdersRoute
   AdminCartsRoute: typeof AdminCartsRoute
   AdminContentRoute: typeof AdminContentRoute
@@ -531,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuoteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -557,6 +590,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/': {
@@ -737,10 +777,12 @@ const rootRouteChildren: RootRouteChildren = {
   OrderRoute: OrderRoute,
   PrivacyRoute: PrivacyRoute,
   QuoteRoute: QuoteRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRouteWithChildren,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  TermsRoute: TermsRoute,
   AccountOrdersRoute: AccountOrdersRoute,
   AdminCartsRoute: AdminCartsRoute,
   AdminContentRoute: AdminContentRoute,

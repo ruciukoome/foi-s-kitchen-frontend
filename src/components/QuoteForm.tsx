@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { site, waLink } from "@/lib/site";
 import { useAuth } from "@/lib/auth";
 import { sendQuoteEmail } from "@/lib/email.functions";
+import { TermsConsent } from "@/components/TermsConsent";
 
 const eventTypes = [
   "Corporate event",
@@ -23,6 +24,7 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
   const { user } = useAuth();
   const send = useServerFn(sendQuoteEmail);
   const [sending, setSending] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [sentRef, setSentRef] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
@@ -57,6 +59,10 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
   function basicsOk() {
     if (!form.name || !form.phone) {
       toast.error("Please add your name and phone number.");
+      return false;
+    }
+    if (!agreed) {
+      toast.error("Please agree to the Terms and Refund Policy first.");
       return false;
     }
     return true;
@@ -173,6 +179,8 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
       {/* Honeypot — hidden from people, bots fill it */}
       <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden"
         value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
+
+      <TermsConsent id="q-terms" checked={agreed} onChange={setAgreed} />
 
       <button type="submit" disabled={sending}
         className="label-caps flex min-h-[48px] items-center justify-center rounded-full bg-primary px-6 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60">
