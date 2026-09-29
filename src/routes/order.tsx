@@ -9,6 +9,8 @@ import { markCartConverted, saveCartSnapshot } from "@/lib/marketing";
 import { currency, site, waLink } from "@/lib/site";
 import { useServerFn } from "@tanstack/react-start";
 import { sendOrderEmail } from "@/lib/email.functions";
+import { initializePaystackCheckout, verifyPaystackTransaction } from "@/lib/paystack.functions";
+import { loadPaystackInline, newPaystackPopup } from "@/lib/paystack-inline";
 import { cn } from "@/lib/utils";
 import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
 import { TermsConsent } from "@/components/TermsConsent";
