@@ -72,9 +72,45 @@ function AdminSettingsPage() {
     }
   }, [getToken, loadSettings]);
 
+  const refreshPaystack = useCallback(async () => {
+    try {
+      const token = await getToken();
+      setPay(await loadPaystack({ data: { accessToken: token } }));
+    } catch {
+      setPay(null);
+    }
+  }, [getToken, loadPaystack]);
+
   useEffect(() => {
-    if (client) void refresh();
-  }, [client, refresh]);
+    if (client) {
+      void refresh();
+      void refreshPaystack();
+    }
+  }, [client, refresh, refreshPaystack]);
+
+  const onSavePaystack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaySaving(true);
+    setPayMsg(null);
+    try {
+      const token = await getToken();
+      const res = await savePaystack({
+        data: { accessToken: token, publicKey: payPublic.trim(), secretKey: paySecret.trim() },
+      });
+      if (!res.ok) {
+        setPayMsg({ kind: "err", text: res.error ?? "Could not save the keys." });
+      } else {
+        setPayMsg({ kind: "ok", text: "Paystack keys saved. Card and M-Pesa checkout is live." });
+        setPayPublic("");
+        setPaySecret("");
+        await refreshPaystack();
+      }
+    } catch (err) {
+      setPayMsg({ kind: "err", text: err instanceof Error ? err.message : "Could not save the keys." });
+    } finally {
+      setPaySaving(false);
+    }
+  };
 
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
