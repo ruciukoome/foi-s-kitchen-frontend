@@ -581,12 +581,27 @@ function OrderPage() {
 
               <button
                 type="button"
+                disabled={paying}
+                onClick={() => {
+                  if (!agreed) return void toast.error("Please agree to the Terms and Refund Policy first.");
+                  void payWithPaystack();
+                }}
+                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-6 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
+              >
+                <Smartphone className="mr-2 h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+                {paying ? "Opening payment…" : `Pay ${currency(total)} with M-Pesa or card`}
+              </button>
+
+              <p className="text-center text-sm text-muted-foreground">Or finish the order and pay later</p>
+
+              <button
+                type="button"
                 disabled={sendingEmail}
                 onClick={() => {
                   if (!agreed) return void toast.error("Please agree to the Terms and Refund Policy first.");
                   void sendByEmail();
                 }}
-                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-6 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
+                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full border border-foreground/20 px-6 transition-colors duration-200 ease-out hover:border-primary hover:text-primary disabled:opacity-60"
               >
                 {sendingEmail ? "Sending…" : "Send order by email"}
               </button>
@@ -603,6 +618,7 @@ function OrderPage() {
                     return;
                   }
                   setSentVia("whatsapp");
+                  setDone(true);
                   void saveOrder();
                   void markCartConverted(client);
                 }}
@@ -614,13 +630,6 @@ function OrderPage() {
                 Complete via WhatsApp
               </a>
 
-              <div className="flex items-start gap-3 rounded-2xl border border-dashed border-input p-5 text-sm text-muted-foreground">
-                <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} aria-hidden="true" />
-                <p>
-                  <strong className="font-display font-semibold text-foreground">M-Pesa STK push — coming soon.</strong>{" "}
-                  For now we send an M-Pesa prompt after confirming your order on WhatsApp.
-                </p>
-              </div>
 
               <button
                 type="button"
