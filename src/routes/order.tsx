@@ -86,7 +86,6 @@ function OrderPage() {
     payment_method: string;
     payment_reference: string | null;
   }) {
-    setDone(true);
     if (!client) return;
     const { error } = await client.from("orders").insert({
       user_id: user?.id ?? null,
