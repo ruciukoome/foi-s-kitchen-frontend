@@ -50,10 +50,13 @@ function OrderPage() {
   const [agreed, setAgreed] = useState(false);
   const [done, setDone] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
-  const [sentVia, setSentVia] = useState<"email" | "whatsapp">("whatsapp");
+  const [sentVia, setSentVia] = useState<"email" | "whatsapp" | "paystack">("whatsapp");
   const [orderRef, setOrderRef] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [paying, setPaying] = useState(false);
   const sendOrder = useServerFn(sendOrderEmail);
+  const startPayment = useServerFn(initializePaystackCheckout);
+  const confirmPayment = useServerFn(verifyPaystackTransaction);
   const [details, setDetails] = useState({
     name: "",
     phone: "",
@@ -78,8 +81,11 @@ function OrderPage() {
     setPrefilled(true);
   }, [profile, prefilled, user]);
 
-  async function saveOrder() {
-    setDone(true);
+  async function saveOrder(payment?: {
+    payment_status: string;
+    payment_method: string;
+    payment_reference: string | null;
+  }) {
     if (!client) return;
     const { error } = await client.from("orders").insert({
       user_id: user?.id ?? null,
@@ -92,6 +98,7 @@ function OrderPage() {
       preferred_time: details.time || null,
       notes: details.notes || null,
       status: "Received",
+      ...(payment ?? {}),
     });
     if (error) {
       console.error(error);
@@ -124,6 +131,7 @@ function OrderPage() {
       }
       setOrderRef(res.reference);
       setSentVia("email");
+      setDone(true);
       void saveOrder();
       void markCartConverted(client);
     } catch {
@@ -132,6 +140,88 @@ function OrderPage() {
       setSendingEmail(false);
     }
   }
+
+  async function payWithPaystack() {
+    if (!/^\S+@\S+\.\S+$/.test(details.email)) {
+      toast.error("Please add your email so we can send you a receipt.");
+      return;
+    }
+    setPaying(true);
+    try {
+      const [init] = await Promise.all([
+        startPayment({
+          data: {
+            email: details.email,
+            name: details.name,
+            phone: details.phone,
+            method: details.method,
+            items: lines.map((l) => ({ id: l.id, name: l.name, qty: l.qty, price: l.price })),
+          },
+        }),
+        loadPaystackInline(),
+      ]);
+      if (!init.ok) {
+        toast.error(init.error);
+        return;
+      }
+
+      // Record the order first so the payment can be matched to it.
+      await saveOrder({
+        payment_status: "pending",
+        payment_method: "paystack",
+        payment_reference: init.reference,
+      });
+
+      newPaystackPopup().resumeTransaction(init.accessCode, {
+        onSuccess: (tx) => {
+          void (async () => {
+            const res = await confirmPayment({ data: { reference: tx.reference } });
+            if (!res.ok || !res.paid) {
+              toast.error(
+                res.ok
+                  ? "That payment didn't go through. Please try again."
+                  : res.error,
+              );
+              setPaying(false);
+              return;
+            }
+            setOrderRef(tx.reference);
+            setSentVia("paystack");
+            setDone(true);
+            void markCartConverted(client);
+            clear();
+            void sendOrder({
+              data: {
+                name: details.name,
+                phone: details.phone,
+                email: details.email,
+                method: details.method,
+                address: details.address || undefined,
+                time: details.time || undefined,
+                notes: details.notes || undefined,
+                items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+              },
+            }).catch(() => undefined);
+            setPaying(false);
+          })();
+        },
+        onCancel: () => {
+          setPaying(false);
+          toast("Payment cancelled — your cart is still here.");
+        },
+        onError: () => {
+          setPaying(false);
+          toast.error("Something went wrong with the payment window.");
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("We couldn't open the payment window. Please try WhatsApp instead.");
+      setPaying(false);
+    }
+  }
+
+
 
 
 
@@ -159,8 +249,16 @@ function OrderPage() {
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground">
             <Check className="h-8 w-8" strokeWidth={2} aria-hidden="true" />
           </span>
-          <h1 className="mt-6 font-display text-3xl font-bold">Order sent</h1>
-          {sentVia === "email" ? (
+          <h1 className="mt-6 font-display text-3xl font-bold">
+            {sentVia === "paystack" ? "Payment received" : "Order sent"}
+          </h1>
+          {sentVia === "paystack" ? (
+            <p className="mt-3 text-muted-foreground">
+              Thank you — your payment came through. Your reference is{" "}
+              <strong className="text-primary">{orderRef}</strong>, and a receipt is on its
+              way to {details.email}. We're starting on your food.
+            </p>
+          ) : sentVia === "email" ? (
             <p className="mt-3 text-muted-foreground">
               Got it — a copy is on its way to {details.email}. Your reference is{" "}
               <strong className="text-primary">{orderRef}</strong>. We'll confirm the total
@@ -483,12 +581,27 @@ function OrderPage() {
 
               <button
                 type="button"
+                disabled={paying}
+                onClick={() => {
+                  if (!agreed) return void toast.error("Please agree to the Terms and Refund Policy first.");
+                  void payWithPaystack();
+                }}
+                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-6 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
+              >
+                <Smartphone className="mr-2 h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+                {paying ? "Opening payment…" : `Pay ${currency(total)} with M-Pesa or card`}
+              </button>
+
+              <p className="text-center text-sm text-muted-foreground">Or finish the order and pay later</p>
+
+              <button
+                type="button"
                 disabled={sendingEmail}
                 onClick={() => {
                   if (!agreed) return void toast.error("Please agree to the Terms and Refund Policy first.");
                   void sendByEmail();
                 }}
-                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-6 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
+                className="label-caps inline-flex min-h-[48px] items-center justify-center rounded-full border border-foreground/20 px-6 transition-colors duration-200 ease-out hover:border-primary hover:text-primary disabled:opacity-60"
               >
                 {sendingEmail ? "Sending…" : "Send order by email"}
               </button>
@@ -505,6 +618,7 @@ function OrderPage() {
                     return;
                   }
                   setSentVia("whatsapp");
+                  setDone(true);
                   void saveOrder();
                   void markCartConverted(client);
                 }}
@@ -516,13 +630,6 @@ function OrderPage() {
                 Complete via WhatsApp
               </a>
 
-              <div className="flex items-start gap-3 rounded-2xl border border-dashed border-input p-5 text-sm text-muted-foreground">
-                <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} aria-hidden="true" />
-                <p>
-                  <strong className="font-display font-semibold text-foreground">M-Pesa STK push — coming soon.</strong>{" "}
-                  For now we send an M-Pesa prompt after confirming your order on WhatsApp.
-                </p>
-              </div>
 
               <button
                 type="button"

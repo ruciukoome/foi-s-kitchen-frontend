@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, CircleAlert, KeyRound, Mail, Send } from "lucide-react";
+import { CheckCircle2, CircleAlert, CreditCard, KeyRound, Mail, Send } from "lucide-react";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,11 @@ import {
   sendTestEmail,
   type EmailSettings,
 } from "@/lib/email.functions";
+import {
+  getPaystackSettings,
+  savePaystackKeys,
+  type PaystackSettings,
+} from "@/lib/paystack.functions";
 import { fieldClass, primaryButtonClass, outlineButtonClass } from "@/lib/ui";
 
 export const Route = createFileRoute("/admin/settings")({
@@ -32,6 +37,8 @@ function AdminSettingsPage() {
   const loadSettings = useServerFn(getEmailSettings);
   const saveKey = useServerFn(saveResendKey);
   const sendTest = useServerFn(sendTestEmail);
+  const loadPaystack = useServerFn(getPaystackSettings);
+  const savePaystack = useServerFn(savePaystackKeys);
 
   const [settings, setSettings] = useState<EmailSettings | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -41,6 +48,11 @@ function AdminSettingsPage() {
   const [testTo, setTestTo] = useState("");
   const [testing, setTesting] = useState(false);
   const [testMsg, setTestMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [pay, setPay] = useState<PaystackSettings | null>(null);
+  const [payPublic, setPayPublic] = useState("");
+  const [paySecret, setPaySecret] = useState("");
+  const [paySaving, setPaySaving] = useState(false);
+  const [payMsg, setPayMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const getToken = useCallback(async () => {
     if (!client) throw new Error("Not signed in");
@@ -60,9 +72,45 @@ function AdminSettingsPage() {
     }
   }, [getToken, loadSettings]);
 
+  const refreshPaystack = useCallback(async () => {
+    try {
+      const token = await getToken();
+      setPay(await loadPaystack({ data: { accessToken: token } }));
+    } catch {
+      setPay(null);
+    }
+  }, [getToken, loadPaystack]);
+
   useEffect(() => {
-    if (client) void refresh();
-  }, [client, refresh]);
+    if (client) {
+      void refresh();
+      void refreshPaystack();
+    }
+  }, [client, refresh, refreshPaystack]);
+
+  const onSavePaystack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaySaving(true);
+    setPayMsg(null);
+    try {
+      const token = await getToken();
+      const res = await savePaystack({
+        data: { accessToken: token, publicKey: payPublic.trim(), secretKey: paySecret.trim() },
+      });
+      if (!res.ok) {
+        setPayMsg({ kind: "err", text: res.error ?? "Could not save the keys." });
+      } else {
+        setPayMsg({ kind: "ok", text: "Paystack keys saved. Card and M-Pesa checkout is live." });
+        setPayPublic("");
+        setPaySecret("");
+        await refreshPaystack();
+      }
+    } catch (err) {
+      setPayMsg({ kind: "err", text: err instanceof Error ? err.message : "Could not save the keys." });
+    } finally {
+      setPaySaving(false);
+    }
+  };
 
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,6 +255,71 @@ function AdminSettingsPage() {
             <p role="status" className="rounded-xl bg-primary/10 px-4 py-3 text-sm text-primary">{testMsg.text}</p>
           </div>
         ) : null}
+      </section>
+
+      {/* Paystack */}
+      <section className="mt-6 rounded-2xl border border-foreground/10 bg-card p-6">
+        <div className="flex items-start gap-3">
+          {pay?.connected ? (
+            <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-primary" aria-hidden />
+          ) : (
+            <CircleAlert className="mt-0.5 h-6 w-6 shrink-0 text-gold" aria-hidden />
+          )}
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+              <CreditCard className="h-5 w-5 text-primary" aria-hidden />
+              {pay?.connected ? `Paystack is connected (${pay.mode} mode)` : "Paystack is not connected yet"}
+            </h2>
+            <p className="mt-1 text-sm text-foreground/70">
+              {pay?.connected
+                ? `Using keys from ${pay.source === "environment" ? "your hosting environment" : "this dashboard"} — ${pay.publicKeyPreview ?? "no public key saved"} / ${pay.secretKeyPreview}.`
+                : "Paste your Paystack keys below to let customers pay by M-Pesa or card at checkout."}
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-4 text-sm text-foreground/70">
+          In Paystack, open <strong>Settings → API Keys &amp; Webhooks</strong>. Copy the test
+          keys while you are testing, then swap them for the live keys when you are ready.
+          Save both boxes empty to switch card payment off.
+        </p>
+
+        <form onSubmit={onSavePaystack} className="mt-4 space-y-3">
+          <label className="block">
+            <span className="label-caps mb-1 block text-foreground/70">Public key</span>
+            <input
+              type="text"
+              value={payPublic}
+              onChange={(e) => setPayPublic(e.target.value)}
+              placeholder="pk_test_••••••••••••"
+              autoComplete="off"
+              className={fieldClass}
+            />
+          </label>
+          <label className="block">
+            <span className="label-caps mb-1 block text-foreground/70">Secret key</span>
+            <input
+              type="password"
+              value={paySecret}
+              onChange={(e) => setPaySecret(e.target.value)}
+              placeholder="sk_test_••••••••••••"
+              autoComplete="off"
+              className={fieldClass}
+            />
+          </label>
+          {payMsg ? (
+            <p role="status" className="rounded-xl bg-primary/10 px-4 py-3 text-sm text-primary">{payMsg.text}</p>
+          ) : null}
+          <button type="submit" disabled={paySaving} className={primaryButtonClass}>
+            {paySaving ? "Saving…" : "Save Paystack keys"}
+          </button>
+        </form>
+
+        <p className="mt-4 border-t border-gold/40 pt-4 text-sm text-foreground/70">
+          Add this webhook address in Paystack so payments are recorded even if a customer
+          closes the page: <code className="break-all">/api/public/paystack-webhook</code> on
+          your live site.
+        </p>
       </section>
     </AdminShell>
   );
