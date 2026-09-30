@@ -50,10 +50,13 @@ function OrderPage() {
   const [agreed, setAgreed] = useState(false);
   const [done, setDone] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
-  const [sentVia, setSentVia] = useState<"email" | "whatsapp">("whatsapp");
+  const [sentVia, setSentVia] = useState<"email" | "whatsapp" | "paystack">("whatsapp");
   const [orderRef, setOrderRef] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [paying, setPaying] = useState(false);
   const sendOrder = useServerFn(sendOrderEmail);
+  const startPayment = useServerFn(initializePaystackCheckout);
+  const confirmPayment = useServerFn(verifyPaystackTransaction);
   const [details, setDetails] = useState({
     name: "",
     phone: "",
