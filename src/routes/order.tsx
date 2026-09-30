@@ -81,7 +81,11 @@ function OrderPage() {
     setPrefilled(true);
   }, [profile, prefilled, user]);
 
-  async function saveOrder() {
+  async function saveOrder(payment?: {
+    payment_status: string;
+    payment_method: string;
+    payment_reference: string | null;
+  }) {
     setDone(true);
     if (!client) return;
     const { error } = await client.from("orders").insert({
@@ -95,6 +99,7 @@ function OrderPage() {
       preferred_time: details.time || null,
       notes: details.notes || null,
       status: "Received",
+      ...(payment ?? {}),
     });
     if (error) {
       console.error(error);
