@@ -131,6 +131,7 @@ function OrderPage() {
       }
       setOrderRef(res.reference);
       setSentVia("email");
+      setDone(true);
       void saveOrder();
       void markCartConverted(client);
     } catch {
@@ -139,6 +140,88 @@ function OrderPage() {
       setSendingEmail(false);
     }
   }
+
+  async function payWithPaystack() {
+    if (!/^\S+@\S+\.\S+$/.test(details.email)) {
+      toast.error("Please add your email so we can send you a receipt.");
+      return;
+    }
+    setPaying(true);
+    try {
+      const [init] = await Promise.all([
+        startPayment({
+          data: {
+            email: details.email,
+            name: details.name,
+            phone: details.phone,
+            method: details.method,
+            items: lines.map((l) => ({ id: l.id, name: l.name, qty: l.qty, price: l.price })),
+          },
+        }),
+        loadPaystackInline(),
+      ]);
+      if (!init.ok) {
+        toast.error(init.error);
+        return;
+      }
+
+      // Record the order first so the payment can be matched to it.
+      await saveOrder({
+        payment_status: "pending",
+        payment_method: "paystack",
+        payment_reference: init.reference,
+      });
+
+      newPaystackPopup().resumeTransaction(init.accessCode, {
+        onSuccess: (tx) => {
+          void (async () => {
+            const res = await confirmPayment({ data: { reference: tx.reference } });
+            if (!res.ok || !res.paid) {
+              toast.error(
+                res.ok
+                  ? "That payment didn't go through. Please try again."
+                  : res.error,
+              );
+              setPaying(false);
+              return;
+            }
+            setOrderRef(tx.reference);
+            setSentVia("paystack");
+            setDone(true);
+            void markCartConverted(client);
+            clear();
+            void sendOrder({
+              data: {
+                name: details.name,
+                phone: details.phone,
+                email: details.email,
+                method: details.method,
+                address: details.address || undefined,
+                time: details.time || undefined,
+                notes: details.notes || undefined,
+                items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+              },
+            }).catch(() => undefined);
+            setPaying(false);
+          })();
+        },
+        onCancel: () => {
+          setPaying(false);
+          toast("Payment cancelled — your cart is still here.");
+        },
+        onError: () => {
+          setPaying(false);
+          toast.error("Something went wrong with the payment window.");
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("We couldn't open the payment window. Please try WhatsApp instead.");
+      setPaying(false);
+    }
+  }
+
+
 
 
 
