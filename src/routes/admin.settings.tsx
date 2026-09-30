@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, CircleAlert, KeyRound, Mail, Send } from "lucide-react";
+import { CheckCircle2, CircleAlert, CreditCard, KeyRound, Mail, Send } from "lucide-react";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,11 @@ import {
   sendTestEmail,
   type EmailSettings,
 } from "@/lib/email.functions";
+import {
+  getPaystackSettings,
+  savePaystackKeys,
+  type PaystackSettings,
+} from "@/lib/paystack.functions";
 import { fieldClass, primaryButtonClass, outlineButtonClass } from "@/lib/ui";
 
 export const Route = createFileRoute("/admin/settings")({
