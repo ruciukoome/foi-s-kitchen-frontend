@@ -37,6 +37,8 @@ function AdminSettingsPage() {
   const loadSettings = useServerFn(getEmailSettings);
   const saveKey = useServerFn(saveResendKey);
   const sendTest = useServerFn(sendTestEmail);
+  const loadPaystack = useServerFn(getPaystackSettings);
+  const savePaystack = useServerFn(savePaystackKeys);
 
   const [settings, setSettings] = useState<EmailSettings | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -46,6 +48,11 @@ function AdminSettingsPage() {
   const [testTo, setTestTo] = useState("");
   const [testing, setTesting] = useState(false);
   const [testMsg, setTestMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [pay, setPay] = useState<PaystackSettings | null>(null);
+  const [payPublic, setPayPublic] = useState("");
+  const [paySecret, setPaySecret] = useState("");
+  const [paySaving, setPaySaving] = useState(false);
+  const [payMsg, setPayMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const getToken = useCallback(async () => {
     if (!client) throw new Error("Not signed in");
