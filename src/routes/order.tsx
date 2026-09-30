@@ -249,8 +249,16 @@ function OrderPage() {
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground">
             <Check className="h-8 w-8" strokeWidth={2} aria-hidden="true" />
           </span>
-          <h1 className="mt-6 font-display text-3xl font-bold">Order sent</h1>
-          {sentVia === "email" ? (
+          <h1 className="mt-6 font-display text-3xl font-bold">
+            {sentVia === "paystack" ? "Payment received" : "Order sent"}
+          </h1>
+          {sentVia === "paystack" ? (
+            <p className="mt-3 text-muted-foreground">
+              Thank you — your payment came through. Your reference is{" "}
+              <strong className="text-primary">{orderRef}</strong>, and a receipt is on its
+              way to {details.email}. We're starting on your food.
+            </p>
+          ) : sentVia === "email" ? (
             <p className="mt-3 text-muted-foreground">
               Got it — a copy is on its way to {details.email}. Your reference is{" "}
               <strong className="text-primary">{orderRef}</strong>. We'll confirm the total
