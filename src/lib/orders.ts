@@ -24,7 +24,45 @@ export type OrderRow = {
   notes: string | null;
   status: string;
   created_at: string;
+  payment_status?: string | null;
+  payment_method?: string | null;
+  payment_reference?: string | null;
+  paid_at?: string | null;
 };
+
+/** Plain-language label for how (and whether) an order was paid. */
+export function paymentLabel(row: OrderRow) {
+  const status = (row.payment_status ?? "unpaid").toLowerCase();
+  const via =
+    row.payment_method === "paystack"
+      ? "Paystack"
+      : row.payment_method === "whatsapp"
+        ? "WhatsApp"
+        : row.payment_method === "email"
+          ? "Email"
+          : row.payment_method === "manual"
+            ? "Manual"
+            : null;
+  if (status === "paid") return via ? `Paid · ${via}` : "Paid";
+  if (status === "pending") return "Payment pending";
+  if (status === "failed") return "Payment failed";
+  return via ? `Unpaid · ${via}` : "Unpaid";
+}
+
+/** Brand-token badge classes per payment state. */
+export function paymentBadgeClass(row: OrderRow) {
+  switch ((row.payment_status ?? "unpaid").toLowerCase()) {
+    case "paid":
+      return "bg-sage text-sage-foreground";
+    case "pending":
+      return "bg-gold/20 text-foreground";
+    case "failed":
+      return "bg-destructive text-destructive-foreground";
+    default:
+      return "bg-secondary text-foreground";
+  }
+}
+
 
 /** Brand-token badge classes per status. */
 export function statusBadgeClass(status: string) {
