@@ -7,10 +7,13 @@ import { useAuth } from "@/lib/auth";
 import {
   ORDER_STATUSES,
   formatOrderDate,
+  paymentBadgeClass,
+  paymentLabel,
   statusBadgeClass,
   summariseItems,
   type OrderRow,
 } from "@/lib/orders";
+
 import { currency } from "@/lib/site";
 import { fieldClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";

@@ -53,12 +53,16 @@ function TermsPage() {
 
           <PolicyBlock title="2. Pre-orders, catering & meal prep">
             <p>
-              Pre-orders and catering bookings must be made within our notice period. Large or customised orders
-              may need a deposit before we buy ingredients. Catering quotes are valid for the period stated on the
-              quote. Meal-prep plans run for the number of meals agreed when you sign up.
+              Catering orders should be placed at least <strong>7 days before the event</strong>. For large events
+              of 100 guests or more, we recommend booking at least <strong>14 days in advance</strong>.
             </p>
-            {/* TODO: confirm with Foi — minimum notice period for catering and quote validity period. */}
+            <p>
+              Catering quotations are valid for <strong>7 days</strong> from the date issued and are subject to
+              availability. Large or customised orders need a deposit before we buy ingredients. Meal-prep plans run
+              for the number of meals agreed when you sign up.
+            </p>
           </PolicyBlock>
+
 
           <PolicyBlock title="3. Cancellations & refunds">
             <p>
