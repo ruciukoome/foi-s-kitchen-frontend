@@ -66,8 +66,12 @@ function TermsPage() {
 
           <PolicyBlock title="3. Cancellations & refunds">
             <p>
-              Cancellation and refund eligibility depends on how far preparation has gone. Deposits may be
-              non-refundable where costs have already been incurred.
+              A <strong>50% deposit</strong> confirms a catering booking, with the balance due no later than{" "}
+              <strong>72 hours before the event</strong>. Cancellations made 14 or more days before the event may
+              qualify for a refund of the deposit, less any non-refundable costs already incurred. Cancellations
+              7–13 days before may be eligible for a partial refund. Cancellations within 72 hours are
+              non-refundable. Meal-prep customers need to give at least <strong>48 hours' notice</strong> to pause,
+              reschedule or cancel.
             </p>
             <p className="text-foreground">
               Fresh and perishable food cannot be returned once it has been prepared or delivered, except where it
@@ -77,6 +81,7 @@ function TermsPage() {
               Full details are in our <Link to="/refund-policy" className={a}>Refund & Cancellation Policy</Link>.
             </p>
           </PolicyBlock>
+
 
           <PolicyBlock title="4. Delivery & collection">
             <p>
