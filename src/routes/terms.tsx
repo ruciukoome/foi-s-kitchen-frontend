@@ -101,10 +101,11 @@ function TermsPage() {
 
           <PolicyBlock title="6. Food quality & complaints">
             <p>
-              If something isn't right, tell us as soon as possible after delivery or collection, with photos where
-              you can, so we can look into it and put it right.
+              Any concerns about an order must be reported within <strong>2 hours of delivery</strong>. You may be
+              asked for photographs or other details so we can assess the issue and put it right.
             </p>
           </PolicyBlock>
+
 
           <PolicyBlock title="7. Website content">
             <p>
