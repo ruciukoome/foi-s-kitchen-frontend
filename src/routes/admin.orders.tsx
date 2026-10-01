@@ -7,10 +7,13 @@ import { useAuth } from "@/lib/auth";
 import {
   ORDER_STATUSES,
   formatOrderDate,
+  paymentBadgeClass,
+  paymentLabel,
   statusBadgeClass,
   summariseItems,
   type OrderRow,
 } from "@/lib/orders";
+
 import { currency } from "@/lib/site";
 import { fieldClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
@@ -86,7 +89,6 @@ function AdminOrdersPage() {
           >
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm text-muted-foreground">{formatOrderDate(o.created_at)}</p>
                 <span
                   className={cn(
                     "label-caps rounded-full px-3 py-1 text-[11px]",
@@ -95,7 +97,28 @@ function AdminOrdersPage() {
                 >
                   {o.status}
                 </span>
+                <span
+                  className={cn(
+                    "label-caps rounded-full px-3 py-1 text-[11px]",
+                    paymentBadgeClass(o),
+                  )}
+                >
+                  {paymentLabel(o)}
+                </span>
               </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Placed {formatOrderDate(o.created_at)}
+              </p>
+              {o.paid_at && (
+                <p className="text-sm text-muted-foreground">
+                  Paid {formatOrderDate(o.paid_at)}
+                </p>
+              )}
+              {o.payment_reference && (
+                <p className="text-sm text-muted-foreground">
+                  Payment reference: <span className="font-mono">{o.payment_reference}</span>
+                </p>
+              )}
               <p className="mt-2 font-display font-semibold">{summariseItems(o.items)}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {o.user_id ? "Account order" : `Guest: ${o.guest_name ?? "—"} · ${o.guest_phone ?? "—"}`}
@@ -110,6 +133,7 @@ function AdminOrdersPage() {
                 {currency(Number(o.total))}
               </p>
             </div>
+
 
             <label className="flex flex-col gap-1 md:w-56">
               <span className="label-caps text-xs">Status</span>

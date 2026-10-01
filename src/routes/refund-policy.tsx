@@ -55,19 +55,19 @@ function RefundPage() {
 
           <PolicyBlock title="How to report a problem">
             <p>
-              WhatsApp or call us on <a href={`tel:${site.phoneTel}`} className={a}>{site.phoneDisplay}</a> as soon
-              as possible after delivery or collection, ideally within a few hours, with your name, order reference
+              Report any concern within <strong>2 hours of delivery</strong>. WhatsApp or call us on{" "}
+              <a href={`tel:${site.phoneTel}`} className={a}>{site.phoneDisplay}</a> with your name, order reference
               and photos of the issue. You can also email <a href={`mailto:${site.email}`} className={a}>{site.email}</a>.
+              Photographs or other details may be needed so we can assess the issue.
             </p>
-            {/* TODO: confirm with Foi — exact reporting window (e.g. 2 hours after delivery). */}
           </PolicyBlock>
 
           <PolicyBlock title="How refunds are paid">
             <p>
               Depending on the issue, we'll offer a replacement, credit on your next order, or a refund. Refunds go
-              back to the M-Pesa number you paid from, as soon as we've confirmed the issue.
+              back to the M-Pesa number you paid from. Approved M-Pesa refunds are processed within{" "}
+              <strong>24–48 hours</strong>, though the time it takes to reflect can vary with your payment provider.
             </p>
-            {/* TODO: confirm with Foi — M-Pesa refund timeline (e.g. within 24–48 hours). */}
           </PolicyBlock>
 
           <PolicyBlock title="One-off food orders">
@@ -79,21 +79,30 @@ function RefundPage() {
 
           <PolicyBlock title="Catering & events">
             <p>
-              A deposit secures your date and lets us buy ingredients and book staff. If you cancel early, we refund
-              the deposit less any costs already incurred. Cancellations close to the event, or after shopping has
-              been done, may not be refundable. Changes to guest numbers are welcome up to the cut-off on your quote.
+              Catering orders should be placed at least <strong>7 days before the event</strong>, or{" "}
+              <strong>14 days</strong> for 100 guests or more. Quotations are valid for <strong>7 days</strong> and
+              are subject to availability. A <strong>50% deposit</strong> confirms your booking, and the balance is
+              due no later than <strong>72 hours before the event</strong>.
             </p>
-            {/* TODO: confirm with Foi — deposit percentage and cancellation lead times (e.g. full refund 14+ days before, non-refundable within 72 hours). */}
+            <ul className="list-disc space-y-1 pl-5">
+              <li><strong>14 or more days before:</strong> deposit refunded, less any non-refundable costs already incurred.</li>
+              <li><strong>7–13 days before:</strong> partial refund, depending on costs already committed.</li>
+              <li><strong>Within 72 hours:</strong> non-refundable — food, staffing and preparation costs are already incurred.</li>
+            </ul>
+            <p>
+              If {site.name} cancels an event, you receive a <strong>full refund of all amounts paid</strong>.
+            </p>
           </PolicyBlock>
 
           <PolicyBlock title="Meal-prep plans">
             <p>
-              You can pause, skip or cancel upcoming meals as long as you tell us before we shop and cook for that
-              batch. Meals already prepared can't be refunded. Paid-for meals you cancel in time are refunded or
-              carried over, whichever you prefer.
+              Please give at least <strong>48 hours' notice</strong> to pause, reschedule or cancel. With less than
+              48 hours' notice, charges may apply for ingredients, preparation or other costs already incurred.
+              Meals already prepared can't be refunded. Meals cancelled in time are refunded or carried over,
+              whichever you prefer.
             </p>
-            {/* TODO: confirm with Foi — notice needed before a batch cook (e.g. 48 hours). */}
           </PolicyBlock>
+
 
           <PolicyBlock title="Your legal rights">
             <p>

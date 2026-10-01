@@ -53,17 +53,25 @@ function TermsPage() {
 
           <PolicyBlock title="2. Pre-orders, catering & meal prep">
             <p>
-              Pre-orders and catering bookings must be made within our notice period. Large or customised orders
-              may need a deposit before we buy ingredients. Catering quotes are valid for the period stated on the
-              quote. Meal-prep plans run for the number of meals agreed when you sign up.
+              Catering orders should be placed at least <strong>7 days before the event</strong>. For large events
+              of 100 guests or more, we recommend booking at least <strong>14 days in advance</strong>.
             </p>
-            {/* TODO: confirm with Foi — minimum notice period for catering and quote validity period. */}
+            <p>
+              Catering quotations are valid for <strong>7 days</strong> from the date issued and are subject to
+              availability. Large or customised orders need a deposit before we buy ingredients. Meal-prep plans run
+              for the number of meals agreed when you sign up.
+            </p>
           </PolicyBlock>
+
 
           <PolicyBlock title="3. Cancellations & refunds">
             <p>
-              Cancellation and refund eligibility depends on how far preparation has gone. Deposits may be
-              non-refundable where costs have already been incurred.
+              A <strong>50% deposit</strong> confirms a catering booking, with the balance due no later than{" "}
+              <strong>72 hours before the event</strong>. Cancellations made 14 or more days before the event may
+              qualify for a refund of the deposit, less any non-refundable costs already incurred. Cancellations
+              7–13 days before may be eligible for a partial refund. Cancellations within 72 hours are
+              non-refundable. Meal-prep customers need to give at least <strong>48 hours' notice</strong> to pause,
+              reschedule or cancel.
             </p>
             <p className="text-foreground">
               Fresh and perishable food cannot be returned once it has been prepared or delivered, except where it
@@ -73,6 +81,7 @@ function TermsPage() {
               Full details are in our <Link to="/refund-policy" className={a}>Refund & Cancellation Policy</Link>.
             </p>
           </PolicyBlock>
+
 
           <PolicyBlock title="4. Delivery & collection">
             <p>
@@ -92,10 +101,11 @@ function TermsPage() {
 
           <PolicyBlock title="6. Food quality & complaints">
             <p>
-              If something isn't right, tell us as soon as possible after delivery or collection, with photos where
-              you can, so we can look into it and put it right.
+              Any concerns about an order must be reported within <strong>2 hours of delivery</strong>. You may be
+              asked for photographs or other details so we can assess the issue and put it right.
             </p>
           </PolicyBlock>
+
 
           <PolicyBlock title="7. Website content">
             <p>
