@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { PageHero } from "@/components/PageHero";
 import { SectionReveal } from "@/components/SectionReveal";
 import { QuoteForm } from "@/components/QuoteForm";
@@ -7,9 +8,7 @@ import { site } from "@/lib/site";
 import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/quote")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    plan: typeof search.plan === "string" ? search.plan : undefined,
-  }),
+  validateSearch: z.object({ plan: z.string().optional() }),
   head: () => ({
     ...pageSeo({
       title: "Request a Catering Quotation in Nairobi | Foi's Kitchen",
