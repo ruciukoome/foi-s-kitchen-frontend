@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ServicesView } from "@/components/ServicesView";
+import { CorporateSpreadBuilder } from "@/components/CorporateSpreadBuilder";
 import {
   breadcrumbSchema,
   jsonLd,
@@ -38,5 +39,10 @@ export const Route = createFileRoute("/services/corporate")({
       ],
     };
   },
-  component: () => <ServicesView category="corporate" />,
+  component: () => (
+    <>
+      <ServicesView category="corporate" />
+      <CorporateSpreadBuilder />
+    </>
+  ),
 });
