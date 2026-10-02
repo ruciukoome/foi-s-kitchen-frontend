@@ -45,4 +45,4 @@ Allow: /
 User-agent: WhatsApp
 Allow: /
 
-Sitemap: https://foiskitchen.netlify.app/sitemap.xml
+Sitemap: https://foiskitchen.com/sitemap.xml
