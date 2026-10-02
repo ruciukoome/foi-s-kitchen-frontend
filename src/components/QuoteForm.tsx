@@ -116,6 +116,11 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
 
   return (
     <form onSubmit={handleEmail} className="flex flex-col gap-4">
+      {context.endsWith("meal prep") && (
+        <p className="border-l border-gold pl-3 font-display font-semibold text-foreground">
+          Requesting: {context}
+        </p>
+      )}
       <div className="flex flex-col gap-2">
         <label htmlFor="q-name" className="label-caps text-xs">Your name</label>
         <input id="q-name" className={fieldClass} autoComplete="name" value={form.name}
