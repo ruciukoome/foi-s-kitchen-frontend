@@ -1,5 +1,8 @@
 # Foi's Kitchen — CMS build roadmap
 
+## Specialised meal prep
+- [x] Pregnancy & nursing, weaning, and clean nutrition cards with request-specific quotation links
+
 - [x] Part 1: media bucket + MediaPicker + /admin/media
 - [x] Part 2: catalog tables code (menu, services, tiers, plans, testimonials, gallery)
 - [x] Part 3: page_sections + global business info (+ SiteInfoProvider wired in __root)

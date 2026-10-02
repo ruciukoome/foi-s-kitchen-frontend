@@ -30,7 +30,7 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
     name: "",
     phone: "",
     email: "",
-    eventType: eventTypes[0],
+    eventType: context.endsWith("meal prep") ? "Meal prep" : eventTypes[0],
     date: "",
     guests: "",
     budget: "",
@@ -116,6 +116,11 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
 
   return (
     <form onSubmit={handleEmail} className="flex flex-col gap-4">
+      {context.endsWith("meal prep") && (
+        <p className="border-l border-gold pl-3 font-display font-semibold text-foreground">
+          Requesting: {context}
+        </p>
+      )}
       <div className="flex flex-col gap-2">
         <label htmlFor="q-name" className="label-caps text-xs">Your name</label>
         <input id="q-name" className={fieldClass} autoComplete="name" value={form.name}
@@ -172,7 +177,7 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
       <div className="flex flex-col gap-2">
         <label htmlFor="q-notes" className="label-caps text-xs">Notes</label>
         <textarea id="q-notes" rows={4} className={`${fieldClass} min-h-[120px]`}
-          placeholder="Menu ideas, dietary needs, venue…" value={form.notes}
+          placeholder={context.endsWith("meal prep") ? "Who is it for? Portions, ingredients, allergies, age/stage if for a baby…" : "Menu ideas, dietary needs, venue…"} value={form.notes}
           onChange={(e) => setForm({ ...form, notes: e.target.value })} />
       </div>
 
