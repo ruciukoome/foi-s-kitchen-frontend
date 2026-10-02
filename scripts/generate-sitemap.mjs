@@ -8,7 +8,9 @@
  */
 import { writeFileSync } from "node:fs";
 
-const SITE_URL = (process.env.VITE_SITE_URL ?? "https://foiskitchen.netlify.app").replace(/\/$/, "");
+let rawSiteUrl = (process.env.VITE_SITE_URL ?? "https://foiskitchen.com").trim();
+if (!/^https?:\/\//i.test(rawSiteUrl)) rawSiteUrl = `https://${rawSiteUrl}`;
+const SITE_URL = rawSiteUrl.replace(/\/$/, "");
 
 const routes = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
