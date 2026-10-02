@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 import { currency, site, waLink } from "@/lib/site";
 import { useCart } from "@/lib/cart";
 import { Skeleton } from "@/components/CmsState";
+import pregnancyMeals from "@/assets/plan-family.jpg";
+import weaningMeals from "@/assets/plan-plant.jpg";
+import nutritionMeals from "@/assets/plan-lean.jpg";
 import {
   imageOf,
   altOf,
@@ -71,6 +74,33 @@ export const servicePaths = {
   weddings: "/services/weddings",
   "meal-prep": "/services/meal-prep",
 } as const;
+
+const specialisedPlans = [
+  {
+    title: "Pregnancy & nursing",
+    plan: "Pregnancy & nursing meal prep",
+    image: pregnancyMeals,
+    alt: "Portioned home-style meals with vegetables and protein",
+    description: "Comforting, varied meals for expectant and nursing mums, planned around your preferences.",
+    ingredients: "Chicken, beef or goat with arrowroot, sweet potato and mixed vegetables.",
+  },
+  {
+    title: "Weaning little ones",
+    plan: "Weaning meal prep",
+    image: weaningMeals,
+    alt: "Portioned vegetables, sweet potato and chickpeas for meal preparation",
+    description: "Small-batch meals for babies starting solids, tailored to their age, stage and foods already introduced.",
+    ingredients: "Soft vegetables and gentle textures, discussed with you before we cook.",
+  },
+  {
+    title: "Clean nutrition",
+    plan: "Clean nutrition meal prep",
+    image: nutritionMeals,
+    alt: "Chicken, vegetables and grains served as a balanced meal",
+    description: "Protein-forward plates built for your routine, portions and food preferences.",
+    ingredients: "Chicken, beef or goat with complex starches, French beans, broccoli or cauliflower.",
+  },
+] as const;
 
 export function ServicesView({ category }: { category: ServiceCategory }) {
   const services = useQuery(servicesQuery);
@@ -196,6 +226,49 @@ export function ServicesView({ category }: { category: ServiceCategory }) {
           </div>
         </div>
       </div>
+
+      {category === "meal-prep" && (
+        <div className="border-t border-border py-12 md:py-16">
+          <p className="label-caps text-primary">Made around you</p>
+          <h2 className="mt-2 font-display text-2xl font-semibold sm:text-3xl">Specialised meal prep</h2>
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            Tell us who we’re cooking for and what works for them. Every plan is made to order, with a price agreed before we cook.
+          </p>
+          <div className="mt-7 grid gap-5 md:grid-cols-3">
+            {specialisedPlans.map((plan) => (
+              <article key={plan.plan} className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+                <div className="aspect-[4/3] overflow-hidden bg-secondary">
+                  <img
+                    src={plan.image}
+                    alt={plan.alt}
+                    loading="lazy"
+                    decoding="async"
+                    width={1024}
+                    height={1024}
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <h3 className="font-display text-xl font-semibold">{plan.title}</h3>
+                  <p className="mt-2 text-muted-foreground">{plan.description}</p>
+                  <p className="mt-3 text-sm text-foreground">{plan.ingredients}</p>
+                  <Link
+                    to="/quote"
+                    search={{ plan: plan.plan }}
+                    className="label-caps mt-6 inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-5 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep"
+                  >
+                    Request a tailored plan
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className="mt-5 text-sm text-muted-foreground">
+            For baby meals, please share your child’s age, known allergies and any guidance from your healthcare professional. Meals are not medical advice.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

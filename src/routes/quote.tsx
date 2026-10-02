@@ -7,6 +7,9 @@ import { site } from "@/lib/site";
 import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/quote")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    plan: typeof search.plan === "string" ? search.plan : undefined,
+  }),
   head: () => ({
     ...pageSeo({
       title: "Request a Catering Quotation in Nairobi | Foi's Kitchen",
@@ -28,6 +31,13 @@ export const Route = createFileRoute("/quote")({
 });
 
 function QuotePage() {
+  const { plan } = Route.useSearch();
+  const selectedPlan = [
+    "Pregnancy & nursing meal prep",
+    "Weaning meal prep",
+    "Clean nutrition meal prep",
+  ].find((item) => item === plan);
+
   return (
     <>
       <PageHero
@@ -43,7 +53,7 @@ function QuotePage() {
       <section className="section-y">
         <div className="container-page max-w-2xl">
           <SectionReveal className="rounded-2xl bg-card p-6 shadow-card md:p-8">
-            <QuoteForm context="General quotation" />
+            <QuoteForm context={selectedPlan ?? "General quotation"} />
           </SectionReveal>
         </div>
       </section>
