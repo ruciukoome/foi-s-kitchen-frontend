@@ -8,7 +8,11 @@ import { site } from "@/lib/site";
 import { breadcrumbSchema, jsonLd, pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/quote")({
-  validateSearch: z.object({ plan: z.string().optional() }),
+  validateSearch: z.object({
+    plan: z.string().optional(),
+    spread: z.string().max(2000).optional(),
+    guests: z.string().max(10).optional(),
+  }),
   head: () => ({
     ...pageSeo({
       title: "Request a Catering Quotation in Nairobi | Foi's Kitchen",
@@ -30,11 +34,12 @@ export const Route = createFileRoute("/quote")({
 });
 
 function QuotePage() {
-  const { plan } = Route.useSearch();
+  const { plan, spread, guests } = Route.useSearch();
   const selectedPlan = [
     "Pregnancy & nursing meal prep",
     "Weaning meal prep",
     "Clean nutrition meal prep",
+    "Custom corporate spread",
   ].find((item) => item === plan);
 
   return (
@@ -52,7 +57,11 @@ function QuotePage() {
       <section className="section-y">
         <div className="container-page max-w-2xl">
           <SectionReveal className="rounded-2xl bg-card p-6 shadow-card md:p-8">
-            <QuoteForm context={selectedPlan ?? "General quotation"} />
+            <QuoteForm
+              context={selectedPlan ?? "General quotation"}
+              initialNotes={spread ?? ""}
+              initialGuests={guests ?? ""}
+            />
           </SectionReveal>
         </div>
       </section>

@@ -20,7 +20,15 @@ const budgets = ["Under KSh 50,000", "KSh 50,000 – 150,000", "KSh 150,000 – 
 const fieldClass =
   "min-h-[48px] w-full rounded-xl border border-input bg-card px-4 py-3 text-base text-foreground outline-none transition-colors duration-200 ease-out focus:border-primary";
 
-export function QuoteForm({ context = "Quotation" }: { context?: string }) {
+export function QuoteForm({
+  context = "Quotation",
+  initialNotes = "",
+  initialGuests = "",
+}: {
+  context?: string;
+  initialNotes?: string;
+  initialGuests?: string;
+}) {
   const { user } = useAuth();
   const send = useServerFn(sendQuoteEmail);
   const [sending, setSending] = useState(false);
@@ -32,9 +40,9 @@ export function QuoteForm({ context = "Quotation" }: { context?: string }) {
     email: "",
     eventType: context.endsWith("meal prep") ? "Meal prep" : eventTypes[0],
     date: "",
-    guests: "",
+    guests: initialGuests,
     budget: "",
-    notes: "",
+    notes: initialNotes,
     website: "",
   });
 
