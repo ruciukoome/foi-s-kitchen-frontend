@@ -18,6 +18,7 @@ export const Route = createFileRoute("/admin/")({
 
 const cards = [
   { to: "/admin/orders", title: "Orders", body: "See new orders and update their status." },
+  { to: "/admin/inventory", title: "Inventory", body: "Check stock in and out, count it, and see who moved what." },
   { to: "/admin/carts", title: "Abandoned carts", body: "See who left food in their cart and nudge them." },
   { to: "/admin/marketing", title: "Contacts", body: "Customer emails, newsletter sign-ups and CSV export." },
   { to: "/admin/requests", title: "Data requests", body: "Record, assign and close customer data requests." },

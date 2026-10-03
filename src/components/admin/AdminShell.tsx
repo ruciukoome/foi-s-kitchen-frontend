@@ -11,6 +11,7 @@ const groups = [
     links: [
       { to: "/admin", label: "Overview", exact: true },
       { to: "/admin/orders", label: "Orders" },
+      { to: "/admin/inventory", label: "Inventory" },
       { to: "/admin/carts", label: "Abandoned carts" },
       { to: "/admin/marketing", label: "Contacts" },
       { to: "/admin/requests", label: "Data requests" },
