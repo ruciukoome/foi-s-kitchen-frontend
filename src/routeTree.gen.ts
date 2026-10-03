@@ -30,6 +30,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCartsRouteImport } from './routes/admin.carts'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
+import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminMenuRouteImport } from './routes/admin.menu'
@@ -152,6 +153,11 @@ const AdminGalleryRoute = AdminGalleryRouteImport.update({
   path: '/admin/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/admin/inventory',
+  path: '/admin/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminMarketingRoute = AdminMarketingRouteImport.update({
   id: '/admin/marketing',
   path: '/admin/marketing',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menu': typeof AdminMenuRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByTo {
   '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menu': typeof AdminMenuRoute
@@ -332,6 +340,7 @@ export interface FileRoutesById {
   '/admin/carts': typeof AdminCartsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menu': typeof AdminMenuRoute
@@ -373,6 +382,7 @@ export interface FileRouteTypes {
     | '/admin/carts'
     | '/admin/content'
     | '/admin/gallery'
+    | '/admin/inventory'
     | '/admin/marketing'
     | '/admin/media'
     | '/admin/menu'
@@ -411,6 +421,7 @@ export interface FileRouteTypes {
     | '/admin/carts'
     | '/admin/content'
     | '/admin/gallery'
+    | '/admin/inventory'
     | '/admin/marketing'
     | '/admin/media'
     | '/admin/menu'
@@ -450,6 +461,7 @@ export interface FileRouteTypes {
     | '/admin/carts'
     | '/admin/content'
     | '/admin/gallery'
+    | '/admin/inventory'
     | '/admin/marketing'
     | '/admin/media'
     | '/admin/menu'
@@ -490,6 +502,7 @@ export interface RootRouteChildren {
   AdminCartsRoute: typeof AdminCartsRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminGalleryRoute: typeof AdminGalleryRoute
+  AdminInventoryRoute: typeof AdminInventoryRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminMediaRoute: typeof AdminMediaRoute
   AdminMenuRoute: typeof AdminMenuRoute
@@ -655,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminGalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/inventory': {
+      id: '/admin/inventory'
+      path: '/admin/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/marketing': {
       id: '/admin/marketing'
       path: '/admin/marketing'
@@ -808,6 +828,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCartsRoute: AdminCartsRoute,
   AdminContentRoute: AdminContentRoute,
   AdminGalleryRoute: AdminGalleryRoute,
+  AdminInventoryRoute: AdminInventoryRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminMediaRoute: AdminMediaRoute,
   AdminMenuRoute: AdminMenuRoute,
