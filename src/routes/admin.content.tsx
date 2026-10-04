@@ -556,7 +556,7 @@ function SpreadForm({
       const j = i + dir;
       if (j < 0 || j >= prev.length) return prev;
       const next = [...prev];
-      [next[i], next[j]] = [next[j], next[i]];
+      next.splice(j, 0, ...next.splice(i, 1));
       return next;
     });
 
