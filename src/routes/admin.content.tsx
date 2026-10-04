@@ -11,6 +11,7 @@ import { pageSectionsQuery, sectionContent, type BusinessInfo } from "@/lib/cms"
 import { arrayToLines, linesToArray, usePageSection } from "@/lib/cms-admin";
 import { iconNames } from "@/lib/icons";
 import { site } from "@/lib/site";
+import { defaultSpread, type SpreadConfig, type SpreadGroup } from "@/lib/spread";
 import { primaryButtonClass, outlineButtonClass } from "@/lib/ui";
 import {
   aboutDefaults,
@@ -64,6 +65,8 @@ function AdminContentPage() {
   const home = useQuery(pageSectionsQuery("home"));
   const about = useQuery(pageSectionsQuery("about"));
   const global = useQuery(pageSectionsQuery("global"));
+  const corporate = useQuery(pageSectionsQuery("corporate"));
+  const spread = sectionContent<SpreadConfig>(corporate.data, "spread-builder", defaultSpread);
   const saveSection = usePageSection();
 
   const slides = sectionContent<{ slides?: HeroSlide[] }>(home.data, "hero", {}).slides ?? defaultHeroSlides;
@@ -120,6 +123,14 @@ function AdminContentPage() {
 
         <Panel title="About — the numbers strip">
           <NumbersForm numbers={numbers} onSave={(next) => saveSection("about", "numbers", next)} />
+        </Panel>
+
+        <Panel title="Corporate — build your spread">
+          <SpreadForm
+            key={corporate.dataUpdatedAt}
+            groups={spread.groups ?? defaultSpread.groups}
+            onSave={(groups) => saveSection("corporate", "spread-builder", { groups })}
+          />
         </Panel>
 
         <Panel title="Contact details (used all over the site)">
@@ -519,6 +530,93 @@ function BusinessForm({
       ))}
       <div className="md:col-span-2">
         <SaveButton saving={saving} label="Save contact details" />
+      </div>
+    </form>
+  );
+}
+
+/* ------------------------------------------------------ corporate spread */
+
+function SpreadForm({
+  groups,
+  onSave,
+}: {
+  groups: SpreadGroup[];
+  onSave: (groups: SpreadGroup[]) => Promise<boolean | void>;
+}) {
+  const [value, setValue] = useState(() =>
+    groups.map((g) => ({ ...g, text: arrayToLines(g.options) })),
+  );
+  const [saving, setSaving] = useState(false);
+
+  const update = (i: number, patch: Partial<(typeof value)[number]>) =>
+    setValue((prev) => prev.map((g, idx) => (idx === i ? { ...g, ...patch } : g)));
+  const move = (i: number, dir: -1 | 1) =>
+    setValue((prev) => {
+      const j = i + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      next.splice(j, 0, ...next.splice(i, 1));
+      return next;
+    });
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    await onSave(
+      value
+        .filter((g) => g.title.trim())
+        .map(({ key, title, text }) => ({ key, title: title.trim(), options: linesToArray(text) })),
+    );
+    setSaving(false);
+  };
+
+  return (
+    <form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
+      <p className="text-sm text-muted-foreground">
+        Customers can always add their own "Other" items in every category.
+      </p>
+      {value.map((g, i) => (
+        <div key={g.key} className="grid gap-4 rounded-xl border border-border p-4">
+          <Field label="Category name">
+            <TextInput value={g.title} onChange={(e) => update(i, { title: e.target.value })} />
+          </Field>
+          <Field label="Choices (one per line)">
+            <TextArea rows={6} value={g.text} onChange={(e) => update(i, { text: e.target.value })} />
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className={outlineButtonClass} onClick={() => move(i, -1)} disabled={i === 0}>
+              Move up
+            </button>
+            <button
+              type="button"
+              className={outlineButtonClass}
+              onClick={() => move(i, 1)}
+              disabled={i === value.length - 1}
+            >
+              Move down
+            </button>
+            <button
+              type="button"
+              className={outlineButtonClass}
+              onClick={() => setValue((prev) => prev.filter((_, idx) => idx !== i))}
+            >
+              Remove category
+            </button>
+          </div>
+        </div>
+      ))}
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          className={outlineButtonClass}
+          onClick={() =>
+            setValue((prev) => [...prev, { key: `cat-${Date.now()}`, title: "", options: [], text: "" }])
+          }
+        >
+          Add category
+        </button>
+        <SaveButton saving={saving} label="Save spread builder" />
       </div>
     </form>
   );
