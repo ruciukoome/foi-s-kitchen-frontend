@@ -23,25 +23,77 @@ export function SiteFooter() {
         <nav className="text-sm" aria-label="Footer">
           <p className="label-caps mb-3 text-primary">Explore</p>
           <ul className="space-y-2 opacity-90">
-            <li><Link to="/" className="hover:text-primary">Home</Link></li>
-            <li><Link to="/about" className="hover:text-primary">About</Link></li>
-            <li><Link to="/menu" className="hover:text-primary">Menu</Link></li>
-            <li><Link to="/gallery" className="hover:text-primary">Gallery &amp; Reviews</Link></li>
-            <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
-            <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
-            <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
-            <li><Link to="/refund-policy" className="hover:text-primary">Refund Policy</Link></li>
+            <li>
+              <Link to="/" className="hover:text-primary">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" className="hover:text-primary">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link to="/menu" className="hover:text-primary">
+                Menu
+              </Link>
+            </li>
+            <li>
+              <Link to="/gallery" className="hover:text-primary">
+                Gallery &amp; Reviews
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="hover:text-primary">
+                Contact
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="hover:text-primary">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/terms" className="hover:text-primary">
+                Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link to="/refund-policy" className="hover:text-primary">
+                Refund Policy
+              </Link>
+            </li>
           </ul>
         </nav>
 
         <nav className="text-sm" aria-label="Services">
           <p className="label-caps mb-3 text-primary">Services</p>
           <ul className="space-y-2 opacity-90">
-            <li><Link to="/services" search={{ category: "corporate" }} className="hover:text-primary">Corporate Catering</Link></li>
-            <li><Link to="/services" search={{ category: "weddings" }} className="hover:text-primary">Weddings &amp; Private Events</Link></li>
-            <li><Link to="/services" search={{ category: "meal-prep" }} className="hover:text-primary">Meal Prep Plans</Link></li>
-            <li><Link to="/order" className="hover:text-primary">Order Online</Link></li>
-            <li><Link to="/quote" className="hover:text-primary">Request a Quotation</Link></li>
+            <li>
+              <Link to="/services" search={{ category: "corporate" }} className="hover:text-primary">
+                Corporate Catering
+              </Link>
+            </li>
+            <li>
+              <Link to="/services" search={{ category: "weddings" }} className="hover:text-primary">
+                Weddings &amp; Private Events
+              </Link>
+            </li>
+            <li>
+              <Link to="/services" search={{ category: "meal-prep" }} className="hover:text-primary">
+                Meal Prep Plans
+              </Link>
+            </li>
+            <li>
+              <Link to="/order" className="hover:text-primary">
+                Order Online
+              </Link>
+            </li>
+            <li>
+              <Link to="/quote" className="hover:text-primary">
+                Request a Quotation
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -50,11 +102,15 @@ export function SiteFooter() {
           <ul className="space-y-3 opacity-90">
             <li className="flex items-start gap-2">
               <Phone className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
-              <a href={`tel:${site.phoneTel}`} className="hover:text-primary">{site.phoneDisplay}</a>
+              <a href={`tel:${site.phoneTel}`} className="hover:text-primary">
+                {site.phoneDisplay}
+              </a>
             </li>
             <li className="flex items-start gap-2">
               <Mail className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
-              <a href={`mailto:${site.email}`} className="hover:text-primary">{site.email}</a>
+              <a href={`mailto:${site.email}`} className="hover:text-primary">
+                {site.email}
+              </a>
             </li>
             <li className="flex items-start gap-2">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
@@ -74,7 +130,8 @@ export function SiteFooter() {
 
       <div className="border-t border-background/15">
         <p className="container-page py-5 text-xs opacity-70">
-          © {new Date().getFullYear()} {site.name}. Nairobi, Kenya.
+          © {new Date().getFullYear()} {site.name}. Nairobi, Kenya. Created by{" "}
+          <Link>https://nafarrosolutions.com/portfolio</Link>
         </p>
       </div>
     </footer>
