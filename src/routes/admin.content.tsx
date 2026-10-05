@@ -7,8 +7,9 @@ import { Field, SelectInput, TextArea, TextInput } from "@/components/admin/Fiel
 import { MediaPicker } from "@/components/admin/MediaPicker";
 import { socialPlatforms } from "@/components/SocialLinks";
 import { defaultHeroSlides, type HeroSlide } from "@/components/HeroCarousel";
-import { pageSectionsQuery, sectionContent, type BusinessInfo } from "@/lib/cms";
+import { menuItemsQuery, pageSectionsQuery, sectionContent, type BusinessInfo } from "@/lib/cms";
 import { arrayToLines, linesToArray, usePageSection } from "@/lib/cms-admin";
+import type { MealOfDayConfig } from "@/components/MealOfTheDay";
 import { iconNames } from "@/lib/icons";
 import { site } from "@/lib/site";
 import { defaultSpread, type SpreadConfig, type SpreadGroup } from "@/lib/spread";
@@ -68,6 +69,8 @@ function AdminContentPage() {
   const corporate = useQuery(pageSectionsQuery("corporate"));
   const spread = sectionContent<SpreadConfig>(corporate.data, "spread-builder", defaultSpread);
   const saveSection = usePageSection();
+  const menu = useQuery(menuItemsQuery);
+  const mealOfDay = sectionContent<MealOfDayConfig>(home.data, "meal-of-the-day", {});
 
   const slides = sectionContent<{ slides?: HeroSlide[] }>(home.data, "hero", {}).slides ?? defaultHeroSlides;
   const features = sectionContent<{ items?: IconItem[] }>(home.data, "feature-icons", {}).items ?? homeDefaults.features;
@@ -103,6 +106,15 @@ function AdminContentPage() {
 
         <Panel title="Home — how it works">
           <IconItemsForm items={steps} onSave={(items) => saveSection("home", "how-it-works", { items })} />
+        </Panel>
+
+        <Panel title="Home — meal of the day">
+          <MealOfDayForm
+            key={home.dataUpdatedAt}
+            config={mealOfDay}
+            dishes={(menu.data ?? []).map((m) => ({ id: m.id, name: m.name, price: Number(m.price), description: m.description ?? "" }))}
+            onSave={(next) => saveSection("home", "meal-of-the-day", next)}
+          />
         </Panel>
 
         <Panel title="About — top of the page">
@@ -617,6 +629,61 @@ function SpreadForm({
           Add category
         </button>
         <SaveButton saving={saving} label="Save spread builder" />
+      </div>
+    </form>
+  );
+}
+
+/* ----------------------------------------------------------- meal of the day */
+
+function MealOfDayForm({
+  config,
+  dishes,
+  onSave,
+}: {
+  config: MealOfDayConfig;
+  dishes: { id: string; name: string; price: number; description: string }[];
+  onSave: (value: MealOfDayConfig) => Promise<boolean | void>;
+}) {
+  const [value, setValue] = useState<MealOfDayConfig>(config);
+  const { saving, submit } = useSaver(onSave);
+  const dish = dishes.find((d) => d.id === value.itemId);
+
+  return (
+    <form className="flex flex-col gap-4" onSubmit={(e) => void submit(e, value)}>
+      <Field label="Today's dish">
+        <SelectInput value={value.itemId ?? ""} onChange={(e) => setValue({ ...value, itemId: e.target.value })}>
+          <option value="">Rotate automatically through the menu</option>
+          {dishes.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </SelectInput>
+      </Field>
+      {dish && (
+        <>
+          <Field label="Description (leave empty to use the menu text)">
+            <TextArea
+              placeholder={dish.description}
+              value={value.description ?? ""}
+              onChange={(e) => setValue({ ...value, description: e.target.value })}
+            />
+          </Field>
+          <Field label="Special price in KSh (leave empty to use the menu price)">
+            <TextInput
+              type="number"
+              min={0}
+              placeholder={String(dish.price)}
+              value={value.price ?? ""}
+              onChange={(e) => setValue({ ...value, price: e.target.value })}
+            />
+          </Field>
+          <p className="text-sm text-muted-foreground">The photo comes from this dish on the Menu page.</p>
+        </>
+      )}
+      <div>
+        <SaveButton saving={saving} label="Save meal of the day" />
       </div>
     </form>
   );
