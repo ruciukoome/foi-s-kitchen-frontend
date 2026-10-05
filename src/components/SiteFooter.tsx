@@ -131,7 +131,14 @@ export function SiteFooter() {
       <div className="border-t border-background/15">
         <p className="container-page py-5 text-xs opacity-70">
           © {new Date().getFullYear()} {site.name}. Nairobi, Kenya. Created by{" "}
-          <Link>https://nafarrosolutions.com/portfolio</Link>
+          <a
+            href="https://nafarrosolutions.com/portfolio"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-primary"
+          >
+            Nafarro Solutions
+          </a>
         </p>
       </div>
     </footer>
