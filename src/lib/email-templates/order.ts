@@ -27,7 +27,7 @@ ${items}
 </table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px">
 ${row("Name", d.name)}${row("Phone", d.phone)}${row("Email", d.email)}${row("Method", d.method)}
-${row("Address", d.method === "Delivery" ? d.address : undefined)}${row("Preferred time", d.time)}${row("Notes", d.notes)}
+${row("Address", d.method === "Delivery" ? d.address : undefined)}${row("Preferred date & time", d.time)}${row("Notes", d.notes)}
 </table>`;
 }
 
