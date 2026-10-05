@@ -2,13 +2,20 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { Skeleton } from "@/components/CmsState";
-import { altOf, imageOf, menuItemsQuery } from "@/lib/cms";
+import { altOf, imageOf, menuItemsQuery, pageSectionsQuery, sectionContent } from "@/lib/cms";
+
+export type MealOfDayConfig = { itemId?: string; description?: string; price?: string };
 import { currency } from "@/lib/site";
 
 export function MealOfTheDay() {
   const { data, isLoading } = useQuery(menuItemsQuery);
   const available = (data ?? []).filter((m) => m.is_available);
-  const item = available.length ? available[new Date().getDay() % available.length]! : null;
+  const home = useQuery(pageSectionsQuery("home"));
+  const cfg = sectionContent<MealOfDayConfig>(home.data, "meal-of-the-day", {});
+  const picked = cfg.itemId ? (data ?? []).find((m) => m.id === cfg.itemId) : undefined;
+  const item = picked ?? (available.length ? available[new Date().getDay() % available.length]! : null);
+  const description = (picked && cfg.description?.trim()) || item?.description;
+  const price = picked && cfg.price?.trim() ? Number(cfg.price) : Number(item?.price ?? 0);
 
   return (
     <section className="section-y bg-blush">
@@ -36,9 +43,9 @@ export function MealOfTheDay() {
             {item ? (
               <>
                 <h2 className="font-display text-3xl font-bold md:text-4xl">{item.name}</h2>
-                <p className="max-w-md text-background/80">{item.description}</p>
+                <p className="max-w-md text-background/80">{description}</p>
                 <p className="font-display text-3xl font-bold text-primary">
-                  {currency(Number(item.price))}
+                  {currency(price)}
                 </p>
               </>
             ) : (
