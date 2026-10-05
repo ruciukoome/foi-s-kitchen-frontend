@@ -63,9 +63,11 @@ function OrderPage() {
     email: "",
     method: "Delivery",
     address: "",
+    date: new Date().toLocaleDateString("en-CA"),
     time: "",
     notes: "",
   });
+  const when = [details.date, details.time].filter(Boolean).join(" ");
 
   // Prefill from the signed-in customer's saved profile (still editable).
   useEffect(() => {
@@ -95,7 +97,7 @@ function OrderPage() {
       total,
       method: details.method,
       address: details.method === "Delivery" ? details.address || null : null,
-      preferred_time: details.time || null,
+      preferred_time: when || null,
       notes: details.notes || null,
       status: "Received",
       ...(payment ?? {}),
@@ -120,7 +122,7 @@ function OrderPage() {
           email: details.email,
           method: details.method,
           address: details.address || undefined,
-          time: details.time || undefined,
+          time: when || undefined,
           notes: details.notes || undefined,
           items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
         },
@@ -197,7 +199,7 @@ function OrderPage() {
                 email: details.email,
                 method: details.method,
                 address: details.address || undefined,
-                time: details.time || undefined,
+                time: when || undefined,
                 notes: details.notes || undefined,
                 items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
               },
@@ -236,7 +238,7 @@ function OrderPage() {
     `Name: ${details.name}`,
     `Phone: ${details.phone}`,
     `${details.method}${details.method === "Delivery" ? `: ${details.address}` : ""}`,
-    details.time ? `Preferred time: ${details.time}` : "",
+    when ? `Preferred date & time: ${when}` : "",
     details.notes ? `Notes: ${details.notes}` : "",
   ]
     .filter(Boolean)
@@ -512,6 +514,18 @@ function OrderPage() {
                   />
                 </div>
               )}
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="o-date" className="label-caps text-xs">Preferred date</label>
+                <input
+                  id="o-date"
+                  type="date"
+                  className={fieldClass}
+                  min={new Date().toLocaleDateString("en-CA")}
+                  value={details.date}
+                  onChange={(e) => setDetails({ ...details, date: e.target.value })}
+                />
+              </div>
 
               <div className="flex flex-col gap-2">
                 <label htmlFor="o-time" className="label-caps text-xs">Preferred time</label>
