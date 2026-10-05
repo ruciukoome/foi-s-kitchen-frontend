@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SectionReveal } from "@/components/SectionReveal";
 import { TestimonialCard } from "@/components/TestimonialCard";
 import { MealOfTheDay } from "@/components/MealOfTheDay";
+import { ReviewSubmitForm } from "@/components/ReviewSubmitForm";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { PrimaryLink, OutlineLink } from "@/components/CtaButtons";
 import { ServiceCard } from "@/components/ServiceCard";
@@ -212,6 +213,10 @@ function HomePage() {
               People keep coming back
             </h2>
           </SectionReveal>
+
+          <div className="mt-6">
+            <ReviewSubmitForm />
+          </div>
 
           <div className="mt-8">
             {reviews.isLoading ? (
