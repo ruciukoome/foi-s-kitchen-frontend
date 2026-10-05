@@ -652,7 +652,7 @@ function MealOfDayForm({
   return (
     <form className="flex flex-col gap-4" onSubmit={(e) => void submit(e, value)}>
       <Field label="Today's dish">
-        <SelectInput value={value.itemId ?? ""} onChange={(e) => setValue({ ...value, itemId: e.target.value || undefined })}>
+        <SelectInput value={value.itemId ?? ""} onChange={(e) => setValue({ ...value, itemId: e.target.value })}>
           <option value="">Rotate automatically through the menu</option>
           {dishes.map((d) => (
             <option key={d.id} value={d.id}>
