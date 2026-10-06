@@ -150,30 +150,31 @@ function OrderPage() {
     }
     setPaying(true);
     try {
+      const accessToken = client ? (await client.auth.getSession()).data.session?.access_token : undefined;
       const [init] = await Promise.all([
         startPayment({
           data: {
+            accessToken,
             email: details.email,
             name: details.name,
             phone: details.phone,
-            method: details.method,
-            items: lines.map((l) => ({ id: l.id, name: l.name, qty: l.qty, price: l.price })),
+            method: details.method === "Pickup" ? "Pickup" : "Delivery",
+            address: details.address || undefined,
+            preferredTime: when || undefined,
+            notes: details.notes || undefined,
+            items: lines.map((l) => ({ id: l.id, qty: l.qty })),
           },
         }),
         loadPaystackInline(),
       ]);
       if (!init.ok) {
         toast.error(init.error);
+        setPaying(false);
         return;
       }
 
-      // Record the order first so the payment can be matched to it.
-      await saveOrder({
-        payment_status: "pending",
-        payment_method: "paystack",
-        payment_reference: init.reference,
-      });
-
+      // The order is created on the server; the kitchen and receipt emails
+      // go out from the server once the payment is confirmed.
       newPaystackPopup().resumeTransaction(init.accessCode, {
         onSuccess: (tx) => {
           void (async () => {
@@ -181,29 +182,17 @@ function OrderPage() {
             if (!res.ok || !res.paid) {
               toast.error(
                 res.ok
-                  ? "That payment didn't go through. Please try again."
+                  ? "We're still confirming your payment. We'll be in touch shortly."
                   : res.error,
               );
               setPaying(false);
               return;
             }
-            setOrderRef(tx.reference);
+            setOrderRef(init.reference);
             setSentVia("paystack");
             setDone(true);
             void markCartConverted(client);
             clear();
-            void sendOrder({
-              data: {
-                name: details.name,
-                phone: details.phone,
-                email: details.email,
-                method: details.method,
-                address: details.address || undefined,
-                time: when || undefined,
-                notes: details.notes || undefined,
-                items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
-              },
-            }).catch(() => undefined);
             setPaying(false);
           })();
         },

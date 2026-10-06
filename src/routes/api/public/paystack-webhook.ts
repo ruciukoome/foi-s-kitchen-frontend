@@ -4,7 +4,8 @@ import { createHmac, timingSafeEqual } from "crypto";
 /**
  * Paystack webhook. Records successful payments even if the customer closes
  * the browser before the popup finishes. Paystack signs the raw body with
- * HMAC SHA-512 using the secret key.
+ * HMAC SHA-512 using the secret key. Only charge.success is acted on; database
+ * errors return 500 so Paystack retries.
  */
 async function resolveSecretKey(): Promise<string | null> {
   const env = process.env["PAYSTACK_SECRET_KEY"]?.trim();
@@ -38,31 +39,37 @@ export const Route = createFileRoute("/api/public/paystack-webhook")({
           return new Response("Invalid signature", { status: 401 });
         }
 
-        let event: { event?: string; data?: { reference?: string; status?: string } };
+        let event: {
+          event?: string;
+          data?: {
+            reference?: string;
+            status?: string;
+            amount?: number;
+            currency?: string;
+            channel?: string;
+            customer?: { email?: string };
+          };
+        };
         try {
           event = JSON.parse(raw);
         } catch {
           return new Response("Bad payload", { status: 400 });
         }
 
-        const reference = event.data?.reference;
-        if (!reference) return new Response("ok");
-
-        const paid = event.event === "charge.success" && event.data?.status === "success";
-        try {
-          const { getSupabaseAdmin } = await import("@/integrations/supabase-external/admin.server");
-          await getSupabaseAdmin()
-            .from("orders")
-            .update({
-              payment_status: paid ? "paid" : "failed",
-              paid_at: paid ? new Date().toISOString() : null,
-            })
-            .eq("payment_reference", reference);
-        } catch (e) {
-          console.error("Paystack webhook update failed", e);
+        // Allowlist: everything else is acknowledged and ignored.
+        if (event.event !== "charge.success" || !event.data?.reference) {
+          return new Response("ignored");
         }
 
-        return new Response("ok");
+        try {
+          const { reconcilePayment } = await import("@/lib/paystack-orders.server");
+          const result = await reconcilePayment(event.data.reference, event.data);
+          if (result.state === "mismatch") console.error("Webhook amount mismatch", event.data.reference);
+          return new Response("ok");
+        } catch (e) {
+          console.error("Paystack webhook update failed", e);
+          return new Response("Retry later", { status: 500 });
+        }
       },
     },
   },
