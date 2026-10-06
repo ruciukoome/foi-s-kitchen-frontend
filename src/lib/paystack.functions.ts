@@ -15,10 +15,8 @@ import { z } from "zod";
 const short = (max: number) => z.string().trim().max(max);
 
 const itemSchema = z.object({
-  id: short(80),
-  name: short(160).min(1),
+  id: short(80).min(1),
   qty: z.number().int().min(1).max(500),
-  price: z.number().min(0).max(1_000_000),
 });
 
 async function readSetting(key: string): Promise<string | null> {
@@ -44,30 +42,17 @@ async function resolvePublicKey(): Promise<string | null> {
   return readSetting("paystack_public_key");
 }
 
-/** Re-price the cart from the menu so the amount charged can't be tampered with. */
-async function trustedTotal(items: z.infer<typeof itemSchema>[]): Promise<number> {
-  try {
-    const { getSupabaseAdmin } = await import("@/integrations/supabase-external/admin.server");
-    const admin = getSupabaseAdmin();
-    const ids = items.map((i) => i.id).filter(Boolean);
-    const { data } = await admin.from("menu_items").select("id, price").in("id", ids);
-    const priceById = new Map<string, number>((data ?? []).map((r: { id: string; price: number }) => [r.id, Number(r.price)]));
-    return items.reduce((sum, i) => {
-      const known = priceById.get(i.id);
-      return sum + (typeof known === "number" && !Number.isNaN(known) ? known : i.price) * i.qty;
-    }, 0);
-  } catch {
-    return items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  }
-}
-
 // --------------------------------------------------------------- customer
 
 const initSchema = z.object({
+  accessToken: z.string().max(4000).optional(),
   email: z.string().trim().email().max(200),
-  name: short(120),
-  phone: short(40),
-  method: short(40),
+  name: short(120).min(1),
+  phone: short(40).min(5),
+  method: z.enum(["Delivery", "Pickup"]),
+  address: short(400).optional(),
+  preferredTime: short(80).optional(),
+  notes: short(2000).optional(),
   items: z.array(itemSchema).min(1).max(60),
 });
 
@@ -75,14 +60,58 @@ export type PaystackInit =
   | { ok: true; reference: string; accessCode: string; amount: number }
   | { ok: false; error: string };
 
+/**
+ * Prices the cart on the server, creates the order (pending) and starts the
+ * Paystack transaction for exactly that total. The browser never writes the
+ * order or its amount.
+ */
 export const initializePaystackCheckout = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => initSchema.parse(d))
   .handler(async ({ data }): Promise<PaystackInit> => {
     const secret = await resolveSecretKey();
     if (!secret) return { ok: false, error: "Card and M-Pesa payment isn't switched on yet." };
 
-    const amount = await trustedTotal(data.items);
-    if (amount <= 0) return { ok: false, error: "Your cart total came to zero." };
+    const { priceCart } = await import("@/lib/paystack-orders.server");
+    const { getSupabaseAdmin } = await import("@/integrations/supabase-external/admin.server");
+    const admin = getSupabaseAdmin();
+
+    let priced;
+    try {
+      priced = await priceCart(data.items);
+    } catch (e) {
+      console.error(e);
+      return { ok: false, error: "We couldn't check prices just now. Please try again." };
+    }
+    if (!priced.ok) return priced;
+    const { items, total } = priced;
+
+    let userId: string | null = null;
+    if (data.accessToken) {
+      const { data: u } = await admin.auth.getUser(data.accessToken);
+      userId = u.user?.id ?? null;
+    }
+
+    const reference = `FK-${crypto.randomUUID().replace(/-/g, "").slice(0, 16).toUpperCase()}`;
+
+    const { error: insertErr } = await admin.from("orders").insert({
+      user_id: userId,
+      guest_name: userId ? null : data.name,
+      guest_phone: userId ? null : data.phone,
+      items: items.map((i) => ({ name: i.name, qty: i.qty, price: i.price })),
+      total,
+      method: data.method,
+      address: data.method === "Delivery" ? data.address || null : null,
+      preferred_time: data.preferredTime || null,
+      notes: data.notes || null,
+      status: "Received",
+      payment_status: "pending",
+      payment_method: "paystack",
+      payment_reference: reference,
+    });
+    if (insertErr) {
+      console.error("Order insert failed", insertErr);
+      return { ok: false, error: "We couldn't save your order. Please try again or use WhatsApp." };
+    }
 
     try {
       const res = await fetch("https://api.paystack.co/transaction/initialize", {
@@ -90,14 +119,15 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
         headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           email: data.email,
-          amount: Math.round(amount * 100), // KES subunits
+          amount: Math.round(total * 100), // KES subunits
           currency: "KES",
+          reference,
           channels: ["card", "mobile_money", "bank_transfer"],
           metadata: {
             customer_name: data.name,
             phone: data.phone,
             fulfilment: data.method,
-            items: data.items.map((i) => `${i.qty} x ${i.name}`).join(", "),
+            items: items.map((i) => `${i.qty} x ${i.name}`).join(", "),
           },
         }),
       });
@@ -106,11 +136,12 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
         message?: string;
         data?: { reference?: string; access_code?: string };
       };
-      if (!res.ok || !body.status || !body.data?.access_code || !body.data?.reference) {
+      if (!res.ok || !body.status || !body.data?.access_code) {
         console.error("Paystack initialize failed", res.status, body.message);
-        return { ok: false, error: body.message || "We couldn't start the payment. Please try again." };
+        await admin.from("orders").update({ payment_status: "failed" }).eq("payment_reference", reference);
+        return { ok: false, error: "We couldn't start the payment. Please try again." };
       }
-      return { ok: true, reference: body.data.reference, accessCode: body.data.access_code, amount };
+      return { ok: true, reference, accessCode: body.data.access_code, amount: total };
     } catch (e) {
       console.error(e);
       return { ok: false, error: "We couldn't reach the payment service. Please try again." };
@@ -134,28 +165,20 @@ export const verifyPaystackTransaction = createServerFn({ method: "POST" })
       const body = (await res.json()) as {
         status?: boolean;
         message?: string;
-        data?: { status?: string; amount?: number; channel?: string };
+        data?: { status?: string; amount?: number; currency?: string; channel?: string; customer?: { email?: string } };
       };
       if (!res.ok || !body.status || !body.data) {
-        return { ok: false, error: body.message || "We couldn't confirm the payment." };
+        return { ok: false, error: "We couldn't confirm the payment." };
       }
-      const paid = body.data.status === "success";
-      const amount = (body.data.amount ?? 0) / 100;
-
-      try {
-        const { getSupabaseAdmin } = await import("@/integrations/supabase-external/admin.server");
-        await getSupabaseAdmin()
-          .from("orders")
-          .update({
-            payment_status: paid ? "paid" : "failed",
-            paid_at: paid ? new Date().toISOString() : null,
-          })
-          .eq("payment_reference", data.reference);
-      } catch (e) {
-        console.error("Could not update order payment status", e);
+      const { reconcilePayment } = await import("@/lib/paystack-orders.server");
+      const result = await reconcilePayment(data.reference, body.data);
+      if (result.state === "paid") {
+        return { ok: true, paid: true, amount: result.amount, channel: result.channel };
       }
-
-      return { ok: true, paid, amount, channel: body.data.channel ?? null };
+      if (result.state === "mismatch") {
+        return { ok: false, error: "The amount paid didn't match your order. Please contact us on WhatsApp." };
+      }
+      return { ok: true, paid: false, amount: 0, channel: null };
     } catch (e) {
       console.error(e);
       return { ok: false, error: "We couldn't confirm the payment. Please contact us on WhatsApp." };
