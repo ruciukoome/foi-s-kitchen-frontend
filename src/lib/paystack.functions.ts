@@ -188,17 +188,8 @@ export const verifyPaystackTransaction = createServerFn({ method: "POST" })
 // ------------------------------------------------------------------ admin
 
 async function requireAdmin(accessToken: string) {
-  const { getSupabaseAdmin } = await import("@/integrations/supabase-external/admin.server");
-  const admin = getSupabaseAdmin();
-  const { data: userData, error } = await admin.auth.getUser(accessToken);
-  if (error || !userData.user) throw new Error("Not signed in");
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", userData.user.id)
-    .maybeSingle();
-  if (!profile?.is_admin) throw new Error("Admins only");
-  return admin;
+  const { requireAdmin: check } = await import("@/lib/admin-auth.server");
+  return check(accessToken);
 }
 
 export type PaystackSettings = {
@@ -209,7 +200,7 @@ export type PaystackSettings = {
   secretKeyPreview: string | null;
 };
 
-const preview = (v: string | null) => (v ? `${v.slice(0, 11)}…${v.slice(-4)}` : null);
+const preview = (v: string | null) => (v ? `${v.slice(0, 8)}…${v.slice(-4)}` : null);
 
 export const getPaystackSettings = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ accessToken: z.string().min(20) }).parse(d))

@@ -44,12 +44,37 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Security headers on every response. frame-ancestors keeps the site
+// embeddable only by itself and the Lovable editor preview.
+const SECURITY_HEADERS: Record<string, string> = {
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(self \"https://checkout.paystack.com\")",
+  "Content-Security-Policy":
+    "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev https://lovable.dev https://*.lovableproject.com; base-uri 'self'; object-src 'none'",
+};
+
+function withSecurityHeaders(response: Response): Response {
+  try {
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
+      if (!response.headers.has(k)) response.headers.set(k, v);
+    }
+    return response;
+  } catch {
+    // Immutable headers (e.g. some proxied responses): copy into a new Response.
+    const headers = new Headers(response.headers);
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) if (!headers.has(k)) headers.set(k, v);
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  }
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

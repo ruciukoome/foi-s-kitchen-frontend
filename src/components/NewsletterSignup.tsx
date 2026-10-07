@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { useAuth } from "@/lib/auth";
+import { useServerFn } from "@tanstack/react-start";
+import { subscribeNewsletter } from "@/lib/newsletter.functions";
 
 /** Small email capture box — feeds the admin marketing contact list. */
 export function NewsletterSignup({ source = "footer" }: { source?: string }) {
-  const { client } = useAuth();
+  const subscribeFn = useServerFn(subscribeNewsletter);
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -21,18 +22,18 @@ export function NewsletterSignup({ source = "footer" }: { source?: string }) {
       toast.error("Please tick the box so we know it's okay to email you.");
       return;
     }
-    if (!client) {
-      toast.error("We can't sign you up right now. Please try again shortly.");
-      return;
-    }
     setBusy(true);
-    const { error } = await client
-      .from("newsletter_subscribers")
-      .insert({ email: email.trim().toLowerCase(), source });
-    setBusy(false);
-    if (error && !error.message.toLowerCase().includes("duplicate")) {
+    try {
+      const res = await subscribeFn({ data: { email: email.trim().toLowerCase(), source } });
+      if (!res.ok) {
+        toast.error(res.error ?? "That didn't go through. Please try again shortly.");
+        return;
+      }
+    } catch {
       toast.error("That didn't go through. Please try again shortly.");
       return;
+    } finally {
+      setBusy(false);
     }
     setDone(true);
     toast.success("You're on the list — thank you!");
