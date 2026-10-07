@@ -11,7 +11,7 @@ const short = (max: number) => z.string().trim().max(max);
 function makeReference(kind: "Q" | "O") {
   const d = new Date();
   const ymd = `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  const rand = Math.random().toString(16).slice(2, 6).toUpperCase();
+  const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
   return `FK-${kind}-${ymd}-${rand}`;
 }
 
@@ -89,6 +89,10 @@ const quoteSchema = z.object({
 export const sendQuoteEmail = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => quoteSchema.parse(d))
   .handler(async ({ data }): Promise<Result> => {
+    const { allowPublicForm } = await import("@/lib/admin-auth.server");
+    if (!(await allowPublicForm("quote", data.email))) {
+      return { ok: false, error: "Too many requests just now. Please try again later or use WhatsApp." };
+    }
     const reference = makeReference("Q");
     try {
       await sendResend({
@@ -129,6 +133,10 @@ const orderSchema = z.object({
 export const sendOrderEmail = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => orderSchema.parse(d))
   .handler(async ({ data }): Promise<Result> => {
+    const { allowPublicForm } = await import("@/lib/admin-auth.server");
+    if (!(await allowPublicForm("order", data.email))) {
+      return { ok: false, error: "Too many requests just now. Please try again later or use WhatsApp." };
+    }
     const reference = makeReference("O");
     try {
       await sendResend({
@@ -160,17 +168,8 @@ export const sendOrderEmail = createServerFn({ method: "POST" })
 const tokenSchema = z.object({ accessToken: z.string().min(20) });
 
 async function requireAdmin(accessToken: string) {
-  const { getSupabaseAdmin } = await import("@/integrations/supabase-external/admin.server");
-  const admin = getSupabaseAdmin();
-  const { data: userData, error } = await admin.auth.getUser(accessToken);
-  if (error || !userData.user) throw new Error("Not signed in");
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", userData.user.id)
-    .maybeSingle();
-  if (!profile?.is_admin) throw new Error("Admins only");
-  return admin;
+  const { requireAdmin: check } = await import("@/lib/admin-auth.server");
+  return check(accessToken);
 }
 
 // ---------------------------------------------------------------------------
