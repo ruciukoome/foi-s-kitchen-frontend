@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { altOf, imageOf, type ServiceRow } from "@/lib/cms";
+import { servicePaths } from "@/components/ServicesView";
 
 export function ServiceCard({ service }: { service: ServiceRow }) {
   return (
@@ -23,8 +24,7 @@ export function ServiceCard({ service }: { service: ServiceRow }) {
         <p className="text-sm text-muted-foreground">{service.description}</p>
 
         <Link
-          to="/services"
-          search={{ category: service.category }}
+          to={servicePaths[service.category]}
           className="mt-auto inline-flex min-h-[44px] items-center gap-1.5 font-display text-sm font-semibold text-primary transition-colors duration-200 ease-out hover:text-primary-deep"
         >
           Learn more

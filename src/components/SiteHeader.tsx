@@ -49,7 +49,7 @@ export function SiteHeader() {
             <NavItem key={l.to} to={l.to} label={l.label} />
           ))}
 
-          <NavItem to="/services" label="Services" />
+          <NavItem to="/services/corporate" label="Services" />
           <NavItem to="/menu" label="Menu" />
 
           <Dropdown label="Order Now" links={orderLinks} variant="button" />
@@ -98,7 +98,7 @@ export function SiteHeader() {
           <nav className="container-page flex flex-col py-3" aria-label="Mobile">
             <MobileLink to="/" label="Home" />
             <MobileLink to="/about" label="About" />
-            <MobileLink to="/services" label="Services" />
+            <MobileLink to="/services/corporate" label="Services" />
             <MobileLink to="/menu" label="Menu" />
             <MobileLink to="/gallery" label="Gallery & Reviews" />
             <MobileLink to="/contact" label="Contact" />

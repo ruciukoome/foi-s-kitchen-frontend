@@ -70,17 +70,17 @@ export function SiteFooter() {
           <p className="label-caps mb-3 text-primary">Services</p>
           <ul className="space-y-2 opacity-90">
             <li>
-              <Link to="/services" search={{ category: "corporate" }} className="hover:text-primary">
+              <Link to="/services/corporate" className="hover:text-primary">
                 Corporate Catering
               </Link>
             </li>
             <li>
-              <Link to="/services" search={{ category: "weddings" }} className="hover:text-primary">
+              <Link to="/services/weddings" className="hover:text-primary">
                 Weddings &amp; Private Events
               </Link>
             </li>
             <li>
-              <Link to="/services" search={{ category: "meal-prep" }} className="hover:text-primary">
+              <Link to="/services/meal-prep" className="hover:text-primary">
                 Meal Prep Plans
               </Link>
             </li>

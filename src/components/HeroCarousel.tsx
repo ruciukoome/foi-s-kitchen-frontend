@@ -17,8 +17,7 @@ export type HeroSlide = {
   cardLabel: string;
   cardNote: string;
   image: string;
-  to: "/quote" | "/services" | "/order" | "/menu";
-  category?: "meal-prep";
+  to: "/quote" | "/services/meal-prep" | "/order" | "/menu";
   cta: string;
 };
 
@@ -43,8 +42,7 @@ export const defaultHeroSlides: HeroSlide[] = [
     cardLabel: "Meal prep",
     cardNote: "From KSh 4,500",
     image: hero3,
-    to: "/services",
-    category: "meal-prep",
+    to: "/services/meal-prep",
     cta: "See the plans",
   },
   {
@@ -174,22 +172,12 @@ export function HeroCarousel() {
               className="animate-fade-up mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap md:mt-7"
               style={{ animationDelay: "300ms" }}
             >
-              {slide.category ? (
-                <Link
-                  to="/services"
-                  search={{ category: slide.category }}
-                  className="label-caps inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-7 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] sm:w-auto"
-                >
-                  {slide.cta}
-                </Link>
-              ) : (
-                <Link
-                  to={slide.to}
-                  className="label-caps inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-7 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] sm:w-auto"
-                >
-                  {slide.cta}
-                </Link>
-              )}
+              <Link
+                to={slide.to}
+                className="label-caps inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-7 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep hover:scale-[1.02] active:scale-[0.97] sm:w-auto"
+              >
+                {slide.cta}
+              </Link>
               <Link
                 to="/order"
                 className="label-caps inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-background/40 px-6 text-background transition-all duration-200 ease-out hover:scale-[1.02] hover:border-background active:scale-[0.97] sm:w-auto"
