@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { PageHero } from "@/components/PageHero";
 import { SectionReveal } from "@/components/SectionReveal";
+import { SkeletonText } from "@/components/CmsState";
 import { PrimaryLink, OutlineLink } from "@/components/CtaButtons";
 import { pageSectionsQuery, sectionContent } from "@/lib/cms";
 import founder from "@/assets/founder.jpg";
@@ -52,11 +53,11 @@ export const aboutDefaults = {
     eyebrow: "The founder",
     heading: '"If I wouldn\'t serve it to my family, it doesn\'t leave the kitchen."',
     paragraphs: [
-      "[PLACEHOLDER] Foi trained at home before she ever trained professionally. What began as catering for friends' weddings turned into a full kitchen serving offices, families and celebrations across Nairobi.",
-      "[PLACEHOLDER] She still writes every menu herself and tastes every pot before it goes out the door.",
+      "Foi learned to cook at home long before she trained professionally. What began as catering for friends' weddings grew into a full kitchen serving offices, families and celebrations across Nairobi.",
+      "She still writes every menu herself and tastes every pot before it goes out the door.",
     ],
     imageUrl: founder,
-    imageAlt: "[PLACEHOLDER] Foi in her kitchen",
+    imageAlt: "Foi in her kitchen",
   } satisfies FounderStory,
   brandValues: {
     eyebrow: "What we stand for",
@@ -83,7 +84,7 @@ export const aboutDefaults = {
 };
 
 function AboutPage() {
-  const { data } = useQuery(pageSectionsQuery("about"));
+  const { data, isLoading } = useQuery(pageSectionsQuery("about"));
 
   const hero = sectionContent<AboutHero>(data, "hero", aboutDefaults.hero);
   const story = sectionContent<FounderStory>(data, "founder-story", aboutDefaults.founderStory);
@@ -114,11 +115,17 @@ function AboutPage() {
           <SectionReveal delay={80} className="flex flex-col gap-4">
             <p className="label-caps text-primary">{story.eyebrow}</p>
             <h2 className="font-display text-[1.75rem] font-semibold md:text-[2rem]">{story.heading}</h2>
-            {story.paragraphs.map((p) => (
-              <p key={p} className="text-muted-foreground">
-                {p}
-              </p>
-            ))}
+            {isLoading ? (
+              <SkeletonText lines={5} />
+            ) : (
+              story.paragraphs
+                .map((p) => p.replace(/^\s*\[PLACEHOLDER\]\s*/i, ""))
+                .map((p) => (
+                  <p key={p} className="text-muted-foreground">
+                    {p}
+                  </p>
+                ))
+            )}
           </SectionReveal>
         </div>
       </section>
