@@ -238,8 +238,8 @@ async function seedSections() {
         eyebrow: "The founder",
         heading: '"If I wouldn\'t serve it to my family, it doesn\'t leave the kitchen."',
         paragraphs: [
-          "[PLACEHOLDER] Foi trained at home before she ever trained professionally. What began as catering for friends' weddings turned into a full kitchen serving offices, families and celebrations across Nairobi.",
-          "[PLACEHOLDER] She still writes every menu herself and tastes every pot before it goes out the door.",
+          "Foi trained at home before she ever trained professionally. What began as catering for friends' weddings turned into a full kitchen serving offices, families and celebrations across Nairobi.",
+          "She still writes every menu herself and tastes every pot before it goes out the door.",
         ],
         imageUrl: urlOf("founder.jpg"),
         imageAlt: "Foi in her kitchen",
