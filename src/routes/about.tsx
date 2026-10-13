@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { PageHero } from "@/components/PageHero";
 import { SectionReveal } from "@/components/SectionReveal";
+import { SkeletonText } from "@/components/CmsState";
 import { PrimaryLink, OutlineLink } from "@/components/CtaButtons";
 import { pageSectionsQuery, sectionContent } from "@/lib/cms";
 import founder from "@/assets/founder.jpg";
