@@ -101,9 +101,9 @@ export function DishDetailSheet({ item, onClose }: { item: MenuItemRow | null; o
             </div>
           </div>
 
-          <div className="sticky bottom-0 -mx-1 mt-auto flex gap-2 rounded-full bg-foreground p-1.5 shadow-card md:static">
+          <div className="sticky bottom-0 -mx-1 mt-auto md:mt-4 flex gap-2 rounded-full bg-foreground p-1.5 shadow-card md:static">
             <button type="button" onClick={addToOrder} className="label-caps flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 text-primary-foreground transition-all duration-200 ease-out hover:bg-primary-deep active:scale-[0.98]">
-              <Plus className="h-4 w-4" /> Add to order · {currency(Number(item.price) * qty)}
+              <Plus className="h-4 w-4" /> Add to order<span className="hidden sm:inline"> · {currency(Number(item.price) * qty)}</span>
             </button>
             <Link to="/order" className="label-caps flex min-h-[48px] items-center justify-center rounded-full px-4 text-background">View cart</Link>
           </div>
