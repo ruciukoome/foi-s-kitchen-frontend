@@ -313,11 +313,14 @@
   letter-spacing: 0;
   overflow-wrap: anywhere;
   text-wrap: balance;
+  width: 122%;
+  margin-left: -11%;
+  transform: scaleX(0.82);
 }
 
 .dish-poster-photo {
   width: 85%;
-  margin-top: -2.75rem;
+  margin-top: -3.5rem;
 }
 
 @media (min-width: 768px) {
@@ -331,7 +334,7 @@
   .dish-poster-photo {
     width: 85%;
     max-width: 560px;
-    margin-top: -3.75rem;
+    margin-top: -4rem;
   }
 }
 

@@ -47,7 +47,7 @@ export function DishDetailSheet({ item, onClose }: { item: MenuItemRow | null; o
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-card motion-safe:animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] bg-card motion-safe:animate-fade-in" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -79,7 +79,7 @@ export function DishDetailSheet({ item, onClose }: { item: MenuItemRow | null; o
         </div>
 
         {/* Lower / right: details */}
-        <div className="dish-details-panel relative z-20 -mt-6 flex flex-1 flex-col gap-5 rounded-t-[32px] bg-card px-5 pt-7 pb-5 md:mt-0 md:justify-center md:rounded-none md:rounded-l-[48px] md:px-10 md:py-10">
+        <div className="dish-details-panel relative z-20 -mt-6 flex flex-1 flex-col gap-5 rounded-t-[32px] bg-card px-5 pt-7 pb-5 md:mt-0 md:justify-end md:rounded-none md:rounded-l-[48px] md:px-10 md:py-10">
           {item.description && <p className="text-[15px] leading-relaxed text-muted-foreground">{item.description}</p>}
           {item.diet_tags.length > 0 && (
             <ul className="flex flex-wrap gap-1.5">
