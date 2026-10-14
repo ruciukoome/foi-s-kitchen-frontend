@@ -73,7 +73,7 @@ export function DishDetailSheet({ item, onClose }: { item: MenuItemRow | null; o
           </h2>
 
           <div className="relative z-10 mx-auto -mt-[clamp(1.25rem,6vw,3rem)] aspect-square w-[min(78%,360px)] motion-safe:animate-dish-float">
-            <DishImage item={item} eager className="h-full w-full rounded-full shadow-[0_30px_60px_-20px_color-mix(in_oklab,var(--foreground)_45%,transparent)]" />
+            <DishImage item={item} eager className="aspect-square h-full w-full rounded-full shadow-[0_30px_60px_-20px_color-mix(in_oklab,var(--foreground)_45%,transparent)]" />
           </div>
         </div>
 

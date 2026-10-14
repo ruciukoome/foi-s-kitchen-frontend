@@ -14,12 +14,12 @@ export function MenuCard({ item, index = 0, onOpen }: { item: MenuItemRow; index
       style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
     >
       <button type="button" onClick={() => onOpen?.(item)} aria-label={`View ${item.name}`} className="-mt-10 mx-auto block aspect-square w-[82%] rounded-full focus-visible:ring-2 focus-visible:ring-primary">
-        <DishImage item={item} className="h-full w-full rounded-full shadow-card transition-transform duration-300 ease-out group-hover:scale-[1.05]" />
+        <DishImage item={item} className="aspect-square h-full w-full rounded-full shadow-card transition-transform duration-300 ease-out group-hover:scale-[1.05]" />
       </button>
 
       <div className="flex flex-1 flex-col gap-2 pt-3">
         <h3 className="font-display text-base font-bold uppercase leading-tight tracking-tight sm:text-lg">
-          <button type="button" onClick={() => onOpen?.(item)} className="text-left hover:text-primary">{item.name}</button>
+          <button type="button" onClick={() => onOpen?.(item)} className="text-left uppercase hover:text-primary">{item.name}</button>
         </h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
 
