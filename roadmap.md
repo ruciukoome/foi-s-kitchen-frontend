@@ -1,8 +1,8 @@
 # Foi's Kitchen — CMS build roadmap
 
 ## Dish detail poster layout
-- [ ] Full-screen wine-red stage, oversized title, overlapping ringed photo and curved white details
-- [ ] Check dish details and portion/cart flow at 390px and 1280px
+- [x] Full-screen wine-red stage, oversized title, overlapping ringed photo and curved white details
+- [x] Check dish details and portion/cart flow at 390px and 1280px
 
 ## Specialised meal prep
 - [x] Pregnancy & nursing, weaning, and clean nutrition cards with request-specific quotation links
