@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Minus, Plus, ShoppingBag, UtensilsCrossed } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -23,25 +23,52 @@ export function DishImage({ item, className, eager }: { item: MenuItemRow; class
 export function DishDetailSheet({ item, onClose }: { item: MenuItemRow | null; onClose: () => void }) {
   const { add, count } = useCart();
   const [qty, setQty] = useState(1);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const isOpen = Boolean(item);
+
+  // Focus management: remember the opener, focus inside, trap Tab, restore on close.
+  useEffect(() => {
+    if (!isOpen) return;
+    const opener = document.activeElement as HTMLElement | null;
+    dialogRef.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true });
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+      if (opener && opener.isConnected && opener !== document.body) opener.focus({ preventScroll: true });
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!item) return;
     setQty(1);
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return onClose();
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const nodes = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+      );
+      if (nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !dialogRef.current.contains(active))) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && (active === last || !dialogRef.current.contains(active))) {
+        e.preventDefault();
+        first?.focus();
+      }
     };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, [item, onClose]);
 
   if (!item) return null;
   const meta = [item.category, ...item.diet_tags.slice(0, 1)].join(" · ");
 
   const addToOrder = () => {
-    for (let i = 0; i < qty; i++) add({ id: item.id, name: item.name, price: Number(item.price) });
+    add({ id: item.id, name: item.name, price: Number(item.price) }, qty);
     toast.success(`${qty} × ${item.name} added to your order`);
     onClose();
   };
@@ -49,6 +76,7 @@ export function DishDetailSheet({ item, onClose }: { item: MenuItemRow | null; o
   return (
     <div className="fixed inset-0 z-[60] bg-card motion-safe:animate-fade-in" onClick={onClose}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dish-title"

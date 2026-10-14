@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, ShoppingBag } from "lucide-react";
@@ -14,6 +14,7 @@ import { breadcrumbSchema, jsonLd, menuSchema, pageSeo } from "@/lib/seo";
 
 const searchSchema = z.object({
   category: z.enum(menuCategories).optional(),
+  dish: z.string().max(64).optional(),
 });
 
 export const Route = createFileRoute("/menu")({
@@ -24,6 +25,9 @@ export const Route = createFileRoute("/menu")({
     try {
       const rows = await context.queryClient.ensureQueryData(menuItemsQuery);
       return {
+        dishes: rows
+          .filter((row) => row.is_available)
+          .map((row) => ({ id: row.id, name: row.name, description: row.description, image: row.image?.url ?? "" })),
         items: rows
           .filter((row) => row.is_available)
           .map((row) => ({
@@ -35,10 +39,26 @@ export const Route = createFileRoute("/menu")({
           })),
       };
     } catch {
-      return { items: [] };
+      return { items: [], dishes: [] };
     }
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, match }) => {
+    const dishId = (match.search as { dish?: string }).dish;
+    const dish = dishId ? loaderData?.dishes?.find((d) => d.id === dishId) : undefined;
+    if (dish) {
+      const title = `${dish.name} | Foi's Kitchen Menu`;
+      const description = (dish.description || `${dish.name}, cooked fresh in Nairobi by Foi's Kitchen.`).slice(0, 160);
+      const dseo = pageSeo({ title, description, path: `/menu?dish=${encodeURIComponent(dish.id)}`, image: "menu" });
+      const img = /^https:\/\//.test(dish.image) ? dish.image : null;
+      return {
+        ...dseo,
+        meta: dseo.meta.map((m) =>
+          img && "property" in m && (m["property"] === "og:image") ? { ...m, content: img }
+          : img && "name" in m && m["name"] === "twitter:image" ? { ...m, content: img }
+          : m,
+        ).filter((m) => !(img && "property" in m && (m["property"] === "og:image:width" || m["property"] === "og:image:height"))),
+      };
+    }
     const seo = pageSeo({
       title: "Menu & Prices | Foi's Kitchen Nairobi",
       description:
@@ -64,7 +84,7 @@ export const Route = createFileRoute("/menu")({
 });
 
 function MenuPage() {
-  const { category } = Route.useSearch();
+  const { category, dish } = Route.useSearch();
   const navigate = useNavigate({ from: "/menu" });
   // Category is driven entirely by the ?category= search param, never local state.
   const active: MenuCategory = category ?? menuCategories[0];
@@ -73,9 +93,25 @@ function MenuPage() {
   const [query, setQuery] = useState("");
   const [diet, setDiet] = useState<DietTag | null>(null);
   const { count } = useCart();
-  const [openDish, setOpenDish] = useState<MenuItemRow | null>(null);
-  const closeDish = useCallback(() => setOpenDish(null), []);
   const { data, isLoading } = useQuery(menuItemsQuery);
+  // The open dish lives in ?dish=<id> so Back closes it and the URL is shareable.
+  const openDish = useMemo(() => (dish ? (data ?? []).find((row) => row.id === dish) ?? null : null), [data, dish]);
+  const pushedRef = useRef(false);
+  const setOpenDish = useCallback(
+    (row: MenuItemRow) => {
+      pushedRef.current = true;
+      navigate({ search: (previous) => ({ ...previous, dish: row.id }) });
+    },
+    [navigate],
+  );
+  const closeDish = useCallback(() => {
+    if (pushedRef.current) {
+      pushedRef.current = false;
+      window.history.back();
+    } else {
+      navigate({ search: (previous) => ({ ...previous, dish: undefined }), replace: true });
+    }
+  }, [navigate]);
 
   const items = useMemo(
     () =>
