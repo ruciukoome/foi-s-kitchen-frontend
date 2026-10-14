@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Dish detail presentation stays in DishDetailSheet with scoped layout styles in the global stylesheet; the overlay preserves the menu route and existing cart operations.
