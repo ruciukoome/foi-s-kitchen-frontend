@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, ShoppingBag } from "lucide-react";
 import { z } from "zod";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { MenuCard } from "@/components/MenuCard";
+import { DishDetailSheet } from "@/components/DishDetailSheet";
 import { SkeletonGrid } from "@/components/CmsState";
-import { dietTags, menuCategories, menuItemsQuery, type DietTag, type MenuCategory } from "@/lib/cms";
+import { dietTags, menuCategories, menuItemsQuery, type DietTag, type MenuCategory, type MenuItemRow } from "@/lib/cms";
 import { useCart } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 import { breadcrumbSchema, jsonLd, menuSchema, pageSeo } from "@/lib/seo";
@@ -72,6 +73,8 @@ function MenuPage() {
   const [query, setQuery] = useState("");
   const [diet, setDiet] = useState<DietTag | null>(null);
   const { count } = useCart();
+  const [openDish, setOpenDish] = useState<MenuItemRow | null>(null);
+  const closeDish = useCallback(() => setOpenDish(null), []);
   const { data, isLoading } = useQuery(menuItemsQuery);
 
   const items = useMemo(
@@ -120,7 +123,7 @@ function MenuPage() {
 
       {!isLoading && items.length > 0 && (
         <div key={`${active}-${diet}-${query}`} className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {items.map((item, index) => <MenuCard key={item.id} item={item} index={index} />)}
+          {items.map((item, index) => <MenuCard key={item.id} item={item} index={index} onOpen={setOpenDish} />)}
         </div>
       )}
 
@@ -137,6 +140,7 @@ function MenuPage() {
           Go to your order ({count})
         </Link>
       </div>
+      <DishDetailSheet item={openDish} onClose={closeDish} />
     </section>
   );
 }
