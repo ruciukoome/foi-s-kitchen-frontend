@@ -53,10 +53,10 @@ export const Route = createFileRoute("/menu")({
       return {
         ...dseo,
         meta: dseo.meta.map((m) =>
-          img && "property" in m && (m.property === "og:image") ? { ...m, content: img }
-          : img && "name" in m && m.name === "twitter:image" ? { ...m, content: img }
+          img && "property" in m && (m["property"] === "og:image") ? { ...m, content: img }
+          : img && "name" in m && m["name"] === "twitter:image" ? { ...m, content: img }
           : m,
-        ).filter((m) => !(img && "property" in m && (m.property === "og:image:width" || m.property === "og:image:height"))),
+        ).filter((m) => !(img && "property" in m && (m["property"] === "og:image:width" || m["property"] === "og:image:height"))),
       };
     }
     const seo = pageSeo({

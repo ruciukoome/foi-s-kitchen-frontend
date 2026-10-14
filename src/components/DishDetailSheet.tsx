@@ -54,10 +54,10 @@ export function DishDetailSheet({ item, onClose }: { item: MenuItemRow | null; o
       const active = document.activeElement;
       if (e.shiftKey && (active === first || !dialogRef.current.contains(active))) {
         e.preventDefault();
-        last.focus();
+        last?.focus();
       } else if (!e.shiftKey && (active === last || !dialogRef.current.contains(active))) {
         e.preventDefault();
-        first.focus();
+        first?.focus();
       }
     };
     document.addEventListener("keydown", onKey);
