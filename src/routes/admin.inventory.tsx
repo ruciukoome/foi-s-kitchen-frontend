@@ -20,7 +20,7 @@ export const Route = createFileRoute("/admin/inventory")({
       { property: "og:description", content: "Internal stock and inventory tracker." },
     ],
   }),
-  component: InventoryPage,
+  component: InventoryRoute,
 });
 
 const CATEGORIES = ["Proteins", "Fresh produce", "Starches", "Dry store", "Spices", "Drinks", "Packaging", "Other"] as const;
@@ -77,7 +77,16 @@ function stockState(i: Item) {
 const emptyItem = { id: "", name: "", category: "Proteins", unit: "kg", reorder_level: "", supplier: "" };
 const emptyMove = { reason: "", quantity: "", unit_cost: "", supplier: "", batch: "", expiry: "", reference: "", note: "" };
 
-function InventoryPage() {
+function InventoryRoute() {
+  return (
+    <AdminShell title="Inventory" note="Check stock in and out — every movement is on record.">
+      <InventoryPanel />
+    </AdminShell>
+  );
+}
+
+/** Stock panel, reused inside the POS "Stock" tab. */
+export function InventoryPanel() {
   const { client } = useAuth();
   const [items, setItems] = useState<Item[] | null>(null);
   const [txs, setTxs] = useState<Tx[]>([]);
@@ -240,7 +249,6 @@ function InventoryPage() {
     );
 
   return (
-    <AdminShell title="Inventory" note="Check stock in and out — every movement is on record.">
       <div className="flex flex-col gap-6">
         {error && (
           <p className="rounded-xl border border-destructive/40 bg-card p-4 text-sm text-destructive">
@@ -590,6 +598,5 @@ function InventoryPage() {
           </>
         )}
       </div>
-    </AdminShell>
   );
 }
