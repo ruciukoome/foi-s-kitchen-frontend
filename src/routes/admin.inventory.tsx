@@ -210,7 +210,7 @@ export function InventoryPanel() {
     setBusy(true);
     let err: { message: string } | null = null;
     try {
-      const movement = { error: err } = await client.rpc("inventory_move", {
+      const movement = {
       _item_id: move.itemId,
       _kind: move.mode,
       _reason: moveForm.reason,

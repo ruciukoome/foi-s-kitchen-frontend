@@ -40,14 +40,15 @@ create policy "Admins read purchase receipts" on public.inventory_receipts for s
 
 create or replace function public.inventory_check_in_receipt(_movement jsonb, _receipt jsonb) returns numeric
 language plpgsql security definer set search_path = public as $$
-declare balance numeric; tx uuid; item uuid := (_movement->>'_item_id')::uuid;
+declare balance numeric; tx uuid; before_ids uuid[]; item uuid := (_movement->>'_item_id')::uuid;
 begin
   if not coalesce(public.is_admin(auth.uid()), false) then raise exception 'Only admins can check in stock'; end if;
   perform 1 from public.inventory_items where id = item for update;
+  select coalesce(array_agg(id), '{}'::uuid[]) into before_ids from public.inventory_transactions where item_id = item;
   balance := public.inventory_move(item, 'in', _movement->>'_reason', (_movement->>'_quantity')::numeric,
     (_movement->>'_unit_cost')::numeric, _movement->>'_supplier', _movement->>'_batch',
     (_movement->>'_expiry')::date, _movement->>'_reference', _movement->>'_note');
-  select id into tx from public.inventory_transactions where item_id = item order by created_at desc, id desc limit 1;
+  select id into strict tx from public.inventory_transactions where item_id = item and not (id = any(before_ids));
   if _receipt is not null then
     if octet_length(decode(_receipt->>'data_base64', 'base64')) > 5242880 then raise exception 'Receipt exceeds 5 MB'; end if;
     insert into public.inventory_receipts(transaction_id, filename, mime_type, data_base64)
@@ -144,4 +145,8 @@ end $$;
 revoke all on function public.pos_record_sale(jsonb,timestamptz,text,text,text,text) from public, anon;
 grant execute on function public.pos_record_sale(jsonb,timestamptz,text,text,text,text) to authenticated;
 notify pgrst, 'reload schema';
+-- Prevent direct balance edits / deletes from bypassing the accountable RPCs.
+revoke insert, update, delete on public.inventory_items from authenticated;
+grant insert(name,category,unit,reorder_level,supplier,updated_at) on public.inventory_items to authenticated;
+grant update(name,category,unit,reorder_level,supplier,updated_at,is_active) on public.inventory_items to authenticated;
 commit;
