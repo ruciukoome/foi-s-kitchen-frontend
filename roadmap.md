@@ -1,5 +1,11 @@
 # Foi's Kitchen — CMS build roadmap
 
+## POS additions
+- [ ] Mix standalone recipes into the dish picker and deduct their ingredients on sales
+- [ ] Attach private purchase receipts to stock check-ins
+- [ ] Require a reason to remove accidental stock and preserve its history
+- [ ] Validate rules and preview; apply schema/storage setup (external database requires user)
+
 ## Dish detail poster layout
 - [x] Full-screen wine-red stage, oversized title, overlapping ringed photo and curved white details
 - [x] Check dish details and portion/cart flow at 390px and 1280px
