@@ -9,6 +9,8 @@ import { useAuth } from "@/lib/auth";
 import { downloadCsv, toCsv } from "@/lib/marketing";
 import { outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
+import { matchesRecipe } from "@/lib/pos";
+import { Button } from "@/components/ui/button";
 import { InventoryPanel } from "./admin.inventory";
 
 export const Route = createFileRoute("/admin/pos")({
@@ -20,14 +22,16 @@ export const Route = createFileRoute("/admin/pos")({
       { name: "description", content: "Record sales, deduct ingredients automatically and keep receipts." },
       { property: "og:title", content: "Point of sale — Foi's Kitchen" },
       { property: "og:description", content: "Internal point of sale for Foi's Kitchen." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: PosPage,
 });
 
-type Dish = { id: string; name: string; price: number; category: string };
+type Dish = { id: string; name: string; price: number; category: string; off_menu?: boolean };
 type Ing = { id: string; name: string; unit: string; quantity: number; created_at: string; is_active: boolean };
-type Recipe = { id: string; menu_item_id: string; inventory_item_id: string; qty_per_portion: number };
+type Recipe = { id: string; menu_item_id: string | null; off_menu_item_id?: string | null; inventory_item_id: string; qty_per_portion: number };
 type SaleItem = { name: string; unit_price: number; quantity: number };
 type Sale = {
   id: string;
@@ -40,7 +44,7 @@ type Sale = {
   logged_by_name: string | null;
   pos_sale_items: SaleItem[];
 };
-type Line = { key: string; menu_item_id: string | null; name: string; unit_price: number; quantity: number };
+type Line = { key: string; off_menu_item_id?: string | null; menu_item_id: string | null; name: string; unit_price: number; quantity: number };
 
 const PAYMENTS = ["Cash", "M-Pesa", "Card", "Bank", "Other"] as const;
 const CHANNELS = ["Walk-in", "Phone / WhatsApp", "Website", "Event", "Other"] as const;
@@ -73,7 +77,7 @@ function PosPage() {
 
   const load = useCallback(async () => {
     if (!client) return;
-    const [d, i, r, s] = await Promise.all([
+    const [d, i, r, s, off] = await Promise.all([
       client.from("menu_items").select("id, name, price, category").order("name"),
       client.from("inventory_items").select("id, name, unit, quantity, created_at, is_active").order("name"),
       client.from("pos_recipes").select("*"),
@@ -82,10 +86,11 @@ function PosPage() {
         .select("*, pos_sale_items(name, unit_price, quantity)")
         .order("sold_at", { ascending: false })
         .limit(500),
+      client.from("pos_off_menu_items").select("id,name,price").order("name"),
     ]);
-    const err = r.error ?? s.error;
+    const err = r.error ?? s.error ?? off.error;
     setError(err ? "The point-of-sale tables aren't set up yet — run docs/pos-schema.sql once." : null);
-    setDishes((d.data ?? []) as Dish[]);
+    setDishes([...(d.data ?? []) as Dish[], ...(off.data ?? []).map((row) => ({ ...row, category: "Off-menu", off_menu: true }))] as Dish[]);
     setIngs((i.data ?? []) as Ing[]);
     setRecipes((r.data ?? []) as Recipe[]);
     setSales((s.data ?? []) as Sale[]);
@@ -189,8 +194,7 @@ function SellTab({
   const deductions = useMemo(() => {
     const m = new Map<string, number>();
     for (const l of lines) {
-      if (!l.menu_item_id) continue;
-      for (const r of recipes.filter((x) => x.menu_item_id === l.menu_item_id)) {
+      for (const r of recipes.filter((x) => matchesRecipe(x, l))) {
         m.set(r.inventory_item_id, (m.get(r.inventory_item_id) ?? 0) + Number(r.qty_per_portion) * l.quantity);
       }
     }
@@ -199,9 +203,9 @@ function SellTab({
 
   const addDish = (d: Dish) =>
     setLines((ls) => {
-      const hit = ls.find((l) => l.menu_item_id === d.id);
+      const hit = ls.find((l) => l.key === d.id);
       if (hit) return ls.map((l) => (l === hit ? { ...l, quantity: l.quantity + 1 } : l));
-      return [...ls, { key: d.id, menu_item_id: d.id, name: d.name, unit_price: Number(d.price), quantity: 1 }];
+      return [...ls, { key: d.id, menu_item_id: d.off_menu ? null : d.id, off_menu_item_id: d.off_menu ? d.id : null, name: d.name, unit_price: Number(d.price), quantity: 1 }];
     });
   const setQty = (key: string, q: number) =>
     setLines((ls) => (q <= 0 ? ls.filter((l) => l.key !== key) : ls.map((l) => (l.key === key ? { ...l, quantity: q } : l))));
@@ -210,7 +214,7 @@ function SellTab({
     if (!client || lines.length === 0) return;
     setBusy(true);
     const { data, error } = await client.rpc("pos_record_sale", {
-      _items: lines.map(({ menu_item_id, name, unit_price, quantity }) => ({ menu_item_id, name, unit_price, quantity })),
+      _items: lines.map(({ menu_item_id, off_menu_item_id, name, unit_price, quantity }) => ({ menu_item_id, off_menu_item_id, name, unit_price, quantity })),
       _sold_at: new Date(soldAt).toISOString(),
       _payment: payment,
       _channel: channel,
@@ -241,10 +245,10 @@ function SellTab({
               onClick={() => addDish(d)}
               className="flex min-h-[88px] flex-col justify-between rounded-2xl border border-border bg-card p-4 text-left transition-all duration-200 ease-out hover:border-primary active:scale-[0.98]"
             >
-              <span className="font-display text-sm font-semibold leading-tight">{d.name}</span>
+              <span className="font-display text-sm font-semibold leading-tight">{d.name}{d.off_menu && <span className="block text-muted-foreground">(Off-menu)</span>}</span>
               <span className="mt-2 flex items-center justify-between text-sm">
                 <span className="font-bold text-primary">{ksh(d.price)}</span>
-                {recipes.some((r) => r.menu_item_id === d.id) && (
+                {recipes.some((r) => matchesRecipe(r, { menu_item_id: d.off_menu ? null : d.id, off_menu_item_id: d.off_menu ? d.id : null })) && (
                   <span className="text-xs text-muted-foreground">recipe ✓</span>
                 )}
               </span>
@@ -327,7 +331,7 @@ function SellTab({
                 return (
                   <li key={id} className={cn(short && "text-destructive")}>
                     {num(q)} {i?.unit} {i?.name ?? "item"}
-                    {short && ` (only ${num(i!.quantity)} left)`}
+                    {short && ` (only ${num(i?.quantity ?? 0)} left)`}
                   </li>
                 );
               })}
@@ -457,11 +461,29 @@ function RecipesTab({
 }) {
   const { client } = useAuth();
   const [dishId, setDishId] = useState("");
+  const [newDish, setNewDish] = useState({ name: "", price: "" });
+  const [creating, setCreating] = useState(false);
   const [ingId, setIngId] = useState("");
   const [amount, setAmount] = useState("");
   const ingById = new Map(ings.map((i) => [i.id, i]));
-  const mine = recipes.filter((r) => r.menu_item_id === dishId);
   const dish = dishes.find((d) => d.id === dishId);
+  const link = { menu_item_id: dish?.off_menu ? null : dishId || null, off_menu_item_id: dish?.off_menu ? dishId : null };
+  const mine = recipes.filter((r) => matchesRecipe(r, link));
+
+  async function createDish(e: React.FormEvent) {
+    e.preventDefault();
+    if (!client || !newDish.name.trim()) return;
+    setCreating(true);
+    try {
+      const { data, error } = await client.from("pos_off_menu_items").insert({ name: newDish.name.trim(), price: Number(newDish.price) || 0 }).select("id").single();
+      if (error) throw error;
+      await onChange();
+      setDishId(data.id);
+      setNewDish({ name: "", price: "" });
+      toast.success("Off-menu dish added.");
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Could not add dish."); }
+    finally { setCreating(false); }
+  }
 
   async function add() {
     if (!client || !dishId || !ingId || !(Number(amount) > 0)) {
@@ -470,7 +492,7 @@ function RecipesTab({
     }
     const { error } = await client
       .from("pos_recipes")
-      .upsert({ menu_item_id: dishId, inventory_item_id: ingId, qty_per_portion: Number(amount) }, { onConflict: "menu_item_id,inventory_item_id" });
+      .upsert({ ...link, inventory_item_id: ingId, qty_per_portion: Number(amount) }, { onConflict: dish?.off_menu ? "off_menu_item_id,inventory_item_id" : "menu_item_id,inventory_item_id" });
     if (error) {
       toast.error(error.message);
       return;
@@ -495,10 +517,15 @@ function RecipesTab({
         <p className="text-sm text-muted-foreground">
           Say what one portion uses — e.g. 1 chapati = 0.1 kg unga. Each sale then deducts it automatically.
         </p>
+        <form onSubmit={createDish} className="grid gap-3 border-b border-border pb-4">
+          <Field label="New off-menu dish"><TextInput required value={newDish.name} onChange={(e) => setNewDish({ ...newDish, name: e.target.value })} /></Field>
+          <Field label="Selling price (KSh)"><TextInput type="number" min={0} step="any" required value={newDish.price} onChange={(e) => setNewDish({ ...newDish, price: e.target.value })} /></Field>
+          <Button type="submit" disabled={creating}>Add off-menu dish</Button>
+        </form>
         <Field label="Dish">
           <SelectInput value={dishId} onChange={(e) => setDishId(e.target.value)}>
             <option value="">Choose a dish…</option>
-            {dishes.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            {dishes.map((d) => <option key={d.id} value={d.id}>{d.name}{d.off_menu ? " (Off-menu)" : ""}</option>)}
           </SelectInput>
         </Field>
         {dish && (
