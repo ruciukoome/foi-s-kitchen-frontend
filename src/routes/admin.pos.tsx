@@ -218,7 +218,10 @@ function SellTab({
       _note: null,
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(`Sale saved — receipt ${data as string}`);
     setLines([]);
     setCustomer("");
@@ -393,18 +396,19 @@ function SalesTab({ sales }: { sales: Sale[] }) {
           onClick={() =>
             downloadCsv(
               "pos-sales.csv",
-              toCsv(
-                shown.map((s) => ({
-                  receipt: s.receipt_no,
-                  sold_at: s.sold_at,
-                  items: s.pos_sale_items.map((i) => `${i.quantity}x ${i.name}`).join("; "),
-                  payment: s.payment_method,
-                  channel: s.channel,
-                  customer: s.customer ?? "",
-                  total: s.total,
-                  by: s.logged_by_name ?? "",
-                })),
-              ),
+              toCsv([
+                ["Receipt", "Sold at", "Items", "Payment", "Channel", "Customer", "Total", "By"],
+                ...shown.map((s) => [
+                  s.receipt_no,
+                  s.sold_at,
+                  s.pos_sale_items.map((i) => `${i.quantity}x ${i.name}`).join("; "),
+                  s.payment_method,
+                  s.channel,
+                  s.customer ?? "",
+                  String(s.total),
+                  s.logged_by_name ?? "",
+                ]),
+              ]              ),
             )
           }
         >
@@ -460,11 +464,17 @@ function RecipesTab({
   const dish = dishes.find((d) => d.id === dishId);
 
   async function add() {
-    if (!client || !dishId || !ingId || !(Number(amount) > 0)) return toast.error("Pick an ingredient and amount.");
+    if (!client || !dishId || !ingId || !(Number(amount) > 0)) {
+      toast.error("Pick an ingredient and amount.");
+      return;
+    }
     const { error } = await client
       .from("pos_recipes")
       .upsert({ menu_item_id: dishId, inventory_item_id: ingId, qty_per_portion: Number(amount) }, { onConflict: "menu_item_id,inventory_item_id" });
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setIngId("");
     setAmount("");
     await onChange();
@@ -472,7 +482,10 @@ function RecipesTab({
   async function remove(id: string) {
     if (!client) return;
     const { error } = await client.from("pos_recipes").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await onChange();
   }
 
