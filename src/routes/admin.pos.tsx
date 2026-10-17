@@ -88,8 +88,8 @@ function PosPage() {
         .limit(500),
       client.from("pos_off_menu_items").select("id,name,price").order("name"),
     ]);
-    const err = r.error ?? s.error ?? off.error;
-    setError(err ? "The point-of-sale tables aren't set up yet — run docs/pos-schema.sql once." : null);
+    const err = d.error ?? i.error ?? r.error ?? s.error ?? off.error;
+    setError(err ? "Could not load the POS. Make sure the inventory, POS and POS enhancements SQL scripts have been applied." : null);
     setDishes([...(d.data ?? []) as Dish[], ...(off.data ?? []).map((row) => ({ ...row, category: "Off-menu", off_menu: true }))] as Dish[]);
     setIngs((i.data ?? []) as Ing[]);
     setRecipes((r.data ?? []) as Recipe[]);

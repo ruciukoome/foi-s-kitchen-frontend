@@ -1,10 +1,12 @@
 # Foi's Kitchen — CMS build roadmap
 
 ## POS additions
-- [ ] Mix standalone recipes into the dish picker and deduct their ingredients on sales
-- [ ] Attach private purchase receipts to stock check-ins
-- [ ] Require a reason to remove accidental stock and preserve its history
-- [ ] Validate rules and preview; apply schema/storage setup (external database requires user)
+- [x] Mix standalone recipes into the dish picker and implement their ingredient deductions
+- [x] Attach private purchase receipts to stock check-ins
+- [x] Require a reason to remove accidental stock and preserve its history
+- [x] Four rule tests pass; preview compiles and signed-out admin access redirects safely
+- [ ] USER: apply docs/pos-enhancements-schema.sql after the inventory and POS scripts
+- [ ] Verify a real off-menu sale, receipt readback and removal (blocked: external schema not applied and no admin session available)
 
 ## Dish detail poster layout
 - [x] Full-screen wine-red stage, oversized title, overlapping ringed photo and curved white details
