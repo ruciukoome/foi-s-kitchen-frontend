@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth";
 import { downloadCsv, exactTime, toCsv } from "@/lib/marketing";
 import { outlineButtonClass, primaryButtonClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
+import { removalReason, validateReceipt } from "@/lib/pos";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin/inventory")({
   ssr: false,
@@ -18,6 +20,8 @@ export const Route = createFileRoute("/admin/inventory")({
       { name: "description", content: "Check stock in and out and keep a full record of every movement." },
       { property: "og:title", content: "Inventory — Foi's Kitchen" },
       { property: "og:description", content: "Internal stock and inventory tracker." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: InventoryRoute,
@@ -62,6 +66,7 @@ type Tx = {
   note: string | null;
   logged_by_name: string | null;
   created_at: string;
+  reversed_transaction_id?: string | null;
 };
 type Mode = "in" | "out" | "adjust";
 
@@ -99,17 +104,23 @@ export function InventoryPanel() {
   const [move, setMove] = useState<{ mode: Mode; itemId: string } | null>(null);
   const [moveForm, setMoveForm] = useState(emptyMove);
   const [busy, setBusy] = useState(false);
+  const [receipt, setReceipt] = useState<File | null>(null);
+  const [receipts, setReceipts] = useState<{ transaction_id: string; filename: string }[]>([]);
+  const [removing, setRemoving] = useState<{ id: string; name: string; kind: "item" | "check-in" } | null>(null);
+  const [reason, setReason] = useState("");
 
   const load = useCallback(async () => {
     if (!client) return;
-    const [i, t] = await Promise.all([
+    const [i, t, r] = await Promise.all([
       client.from("inventory_items").select("*").order("name"),
       client.from("inventory_transactions").select("*").order("created_at", { ascending: false }).limit(500),
+      client.from("inventory_receipts").select("transaction_id,filename"),
     ]);
     if (i.error) setError(i.error.message);
     else setError(null);
     setItems((i.data ?? []) as Item[]);
     setTxs((t.data ?? []) as Tx[]);
+    setReceipts(r.data ?? []);
   }, [client]);
 
   useEffect(() => {
@@ -182,6 +193,7 @@ export function InventoryPanel() {
   }
 
   function openMove(mode: Mode, itemId = "") {
+    setReceipt(null);
     setMove({ mode, itemId: itemId || active[0]?.id || "" });
     setMoveForm({ ...emptyMove, reason: mode === "in" ? "Stock received" : mode === "out" ? OUT_REASONS[0] : "Stock take" });
     setItemForm(null);
@@ -196,7 +208,9 @@ export function InventoryPanel() {
     if (!moveForm.quantity || Number.isNaN(amount)) return void toast.error("Enter a quantity.");
     if (move.mode === "adjust" && !moveForm.note.trim()) return void toast.error("Add a note explaining the count.");
     setBusy(true);
-    const { error: err } = await client.rpc("inventory_move", {
+    let err: { message: string } | null = null;
+    try {
+      const movement = { error: err } = await client.rpc("inventory_move", {
       _item_id: move.itemId,
       _kind: move.mode,
       _reason: moveForm.reason,
@@ -207,12 +221,63 @@ export function InventoryPanel() {
       _expiry: moveForm.expiry || null,
       _reference: moveForm.reference || null,
       _note: moveForm.note || null,
-    });
+    };
+      if (move.mode === "in" && receipt) {
+        validateReceipt(receipt);
+        const data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+          reader.onerror = () => reject(new Error("Could not read receipt."));
+          reader.readAsDataURL(receipt);
+        });
+        const result = await client.rpc("inventory_check_in_receipt", {
+          _movement: movement,
+          _receipt: { filename: receipt.name, mime_type: receipt.type, data_base64: data },
+        });
+        err = result.error;
+      } else {
+        const result = await client.rpc("inventory_move", movement);
+        err = result.error;
+      }
+    } catch (error) { err = { message: error instanceof Error ? error.message : "Could not save stock." }; }
     setBusy(false);
     if (err) return void toast.error(err.message);
     toast.success(move.mode === "in" ? "Stock checked in." : move.mode === "out" ? "Stock checked out." : "Count recorded.");
     setMove(null);
     await load();
+  }
+
+
+  async function removeAccidental(e: React.FormEvent) {
+    e.preventDefault();
+    if (!client || !removing) return;
+    setBusy(true);
+    try {
+      const mandatoryReason = removalReason(reason);
+      const { error } = removing.kind === "item"
+        ? await client.rpc("inventory_remove_item", { _item_id: removing.id, _reason: mandatoryReason })
+        : await client.rpc("inventory_reverse_check_in", { _transaction_id: removing.id, _reason: mandatoryReason });
+      if (error) throw new Error(error.message);
+      toast.success("Accidental stock removed. Reason saved in history.");
+      setRemoving(null);
+      setReason("");
+      await load();
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Could not remove stock."); }
+    finally { setBusy(false); }
+  }
+
+  async function viewReceipt(transactionId: string) {
+    if (!client) return;
+    const popup = window.open("", "_blank");
+    try {
+      const { data, error } = await client.from("inventory_receipts").select("mime_type,data_base64").eq("transaction_id", transactionId).single();
+      if (error) throw new Error(error.message);
+      const bytes = Uint8Array.from(atob(data.data_base64), (c) => c.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: data.mime_type }));
+      if (popup) { popup.opener = null; popup.location.href = url; }
+      else { const a = document.createElement("a"); a.href = url; a.download = receipts.find((r) => r.transaction_id === transactionId)?.filename ?? "receipt"; a.click(); }
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) { popup?.close(); toast.error(err instanceof Error ? err.message : "Could not open receipt."); }
   }
 
   function exportLedger() {
@@ -250,6 +315,19 @@ export function InventoryPanel() {
 
   return (
       <div className="flex flex-col gap-6">
+        {removing && (
+          <CardRow>
+            <form onSubmit={removeAccidental} className="grid gap-4">
+              <h2 className="font-display font-semibold">Remove {removing.name}</h2>
+              <p className="text-sm text-muted-foreground">{removing.kind === "check-in" ? "This reverses the check-in. The original entry stays in history." : "This removes the item and its balance from active stock. Its history stays on record."}</p>
+              <Field label="Reason (required)"><TextArea required autoFocus value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" disabled={busy || !reason.trim()}>Confirm removal</Button>
+                <Button type="button" className={outlineButtonClass} onClick={() => setRemoving(null)}>Cancel</Button>
+              </div>
+            </form>
+          </CardRow>
+        )}
         {error && (
           <p className="rounded-xl border border-destructive/40 bg-card p-4 text-sm text-destructive">
             {error.includes("inventory")
@@ -332,6 +410,15 @@ export function InventoryPanel() {
                 )}
                 {move.mode === "in" && (
                   <>
+                    <Field label="Purchase receipt (optional)">
+                      <TextInput type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) { setReceipt(null); return; }
+                        try { validateReceipt(file); setReceipt(file); }
+                        catch (err) { e.target.value = ""; setReceipt(null); toast.error(err instanceof Error ? err.message : "Invalid receipt."); }
+                      }} />
+                      {receipt && <span className="break-all text-sm text-muted-foreground">{receipt.name}</span>}
+                    </Field>
                     <Field label="Price per unit (KSh)">
                       <TextInput
                         type="number"
@@ -525,6 +612,7 @@ export function InventoryPanel() {
                         <button type="button" className={cn(outlineButtonClass, "px-4")} onClick={() => void archive(i)}>
                           Hide
                         </button>
+                        <Button type="button" className={cn(outlineButtonClass, "px-4")} onClick={() => { setReason(""); setRemoving({ id: i.id, name: i.name, kind: "item" }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Remove accidental item</Button>
                       </div>
                     </CardRow>
                   );
@@ -585,6 +673,10 @@ export function InventoryPanel() {
                               .join(" · ")}
                           </p>
                         )}
+                        {receipts.some((r) => r.transaction_id === t.id) && <Button type="button" className={cn(outlineButtonClass, "mt-3")} onClick={() => void viewReceipt(t.id)}>View purchase receipt</Button>}
+                        {t.kind === "in" && (txs.some((r) => r.reversed_transaction_id === t.id)
+                          ? <p className="mt-2 text-sm text-primary">Removed — see correction in history</p>
+                          : <Button type="button" className={cn(outlineButtonClass, "mt-3")} onClick={() => { setReason(""); setRemoving({ id: t.id, name: `${it?.name ?? "stock"} check-in`, kind: "check-in" }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Remove accidental check-in</Button>)}
                         {t.note && <p className="mt-1 text-sm text-muted-foreground">“{t.note}”</p>}
                         <p className="mt-2 text-xs text-muted-foreground">
                           {exactTime(t.created_at)} · by {t.logged_by_name ?? "admin"}
