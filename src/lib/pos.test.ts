@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { matchesRecipe, removalReason, validateReceipt } from "./pos";
+import { matchesRecipe, removalReason, shouldSyncOrder, summariseUsage, validateReceipt } from "./pos";
 
 describe("POS accountability", () => {
   test("off-menu recipes match only their own dish", () => {
@@ -24,7 +24,6 @@ describe("POS accountability", () => {
     assert.throws(() => validateReceipt({ size: 5 * 1024 * 1024 + 1, type: "image/jpeg" }));
   });
 });
-import { shouldSyncOrder, summariseUsage } from "./pos";
 describe("Website order stock sync", () => {
   test("only Preparing syncs, and only once", () => {
     assert.equal(shouldSyncOrder("Preparing", null), true);
