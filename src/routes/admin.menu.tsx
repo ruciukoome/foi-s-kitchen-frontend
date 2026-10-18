@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Field, SelectInput, TextArea, TextInput } from "@/components/admin/Fields";
 import { MediaPicker } from "@/components/admin/MediaPicker";
+import { DishStockUsage } from "@/components/admin/DishStockUsage";
 import { dietTags, menuCategories, menuItemsQuery, type MenuItemRow } from "@/lib/cms";
 import { useCmsTable } from "@/lib/cms-admin";
 import { outlineButtonClass, primaryButtonClass } from "@/lib/ui";
@@ -218,6 +219,8 @@ function MenuForm({
         />
         <span className="text-sm">Show on the menu</span>
       </label>
+
+      {value.id && <DishStockUsage menuItemId={value.id} />}
 
       <div className="flex flex-wrap gap-2 md:col-span-2">
         <button type="submit" className={primaryButtonClass} disabled={saving}>

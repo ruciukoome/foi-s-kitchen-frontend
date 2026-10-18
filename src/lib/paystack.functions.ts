@@ -97,7 +97,7 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
       user_id: userId,
       guest_name: userId ? null : data.name,
       guest_phone: userId ? null : data.phone,
-      items: items.map((i) => ({ name: i.name, qty: i.qty, price: i.price })),
+      items: items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
       total,
       method: data.method,
       address: data.method === "Delivery" ? data.address || null : null,

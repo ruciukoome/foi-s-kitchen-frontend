@@ -59,3 +59,4 @@
 - [x] Inboxes: orders@foiskitchen.com (orders), quotations@foiskitchen.com (quotes); env overrides ORDERS_INBOX / QUOTES_INBOX
 - [ ] USER: run docs/email-settings-schema.sql in Supabase SQL editor
 - [ ] USER: verify foiskitchen.com domain in Resend (until then emails only reach the Resend account email)
+- [x] Website orders marked Preparing record a POS sale and deduct recipe stock (docs/order-stock-sync-schema.sql); per-dish stock usage editable in Admin → Menu

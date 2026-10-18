@@ -93,7 +93,7 @@ function OrderPage() {
       user_id: user?.id ?? null,
       guest_name: user ? null : details.name,
       guest_phone: user ? null : details.phone,
-      items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+      items: lines.map((l) => ({ id: l.id, name: l.name, qty: l.qty, price: l.price })),
       total,
       method: details.method,
       address: details.method === "Delivery" ? details.address || null : null,
