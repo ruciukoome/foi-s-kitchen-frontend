@@ -24,3 +24,21 @@ describe("POS accountability", () => {
     assert.throws(() => validateReceipt({ size: 5 * 1024 * 1024 + 1, type: "image/jpeg" }));
   });
 });
+import { shouldSyncOrder, summariseUsage } from "./pos";
+describe("Website order stock sync", () => {
+  test("only Preparing syncs, and only once", () => {
+    assert.equal(shouldSyncOrder("Preparing", null), true);
+    assert.equal(shouldSyncOrder("Preparing", "FK-POS-1"), false);
+    assert.equal(shouldSyncOrder("Completed", null), false);
+  });
+  test("not enough stock is flagged as a shortage", () => {
+    const s = summariseUsage([{ name: "Unga", unit: "kg", used: 2, remaining: -1.5, short: true }]);
+    assert.equal(s.shortages.length, 1);
+    assert.match(s.shortages[0]!, /short by 1.5 kg/);
+  });
+  test("enough stock reports used and remaining", () => {
+    const s = summariseUsage([{ name: "Unga", unit: "kg", used: 2, remaining: 8, short: false }]);
+    assert.equal(s.shortages.length, 0);
+    assert.equal(s.lines[0], "Unga: used 2 kg, 8 kg left");
+  });
+});
