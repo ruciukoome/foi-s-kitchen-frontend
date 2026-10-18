@@ -13,3 +13,4 @@
 - POS-only dishes live separately from the public menu and use explicit recipe links so selling them deducts stock without publishing them.
 - Purchase receipts are capped at 5 MB, stored in a separate admin-only document table and attached atomically to check-ins so private documents are never included in public media or stock list queries.
 - Accidental stock removal uses reason-required database RPCs and appended corrections, never ledger deletion, to preserve accountability.
+- Website orders sync to POS once via the pos_sync_order RPC when marked Preparing; orders.pos_receipt_no guards against double deduction.
