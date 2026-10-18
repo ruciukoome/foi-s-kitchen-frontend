@@ -13,7 +13,7 @@ import {
   summariseItems,
   type OrderRow,
 } from "@/lib/orders";
-
+import { shouldSyncOrder, summariseUsage, type OrderSyncResult } from "@/lib/pos";
 import { currency } from "@/lib/site";
 import { fieldClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
@@ -57,14 +57,48 @@ function AdminOrdersPage() {
   async function updateStatus(id: string, status: string) {
     if (!client) return;
     const previous = orders;
+    const order = orders?.find((o) => o.id === id);
     setOrders((rows) => rows?.map((o) => (o.id === id ? { ...o, status } : o)) ?? rows);
     const { error: err } = await client.from("orders").update({ status }).eq("id", id);
     if (err) {
       setOrders(previous ?? null);
       toast.error(err.message);
-    } else {
-      toast.success("Status updated.");
+      return;
     }
+    toast.success("Status updated.");
+    if (shouldSyncOrder(status, order?.pos_receipt_no)) await syncStock(id);
+  }
+
+  async function syncStock(id: string) {
+    if (!client) return;
+    const { data, error: err } = await client.rpc("pos_sync_order", { _order_id: id });
+    if (err) {
+      toast.error(`Stock wasn't deducted: ${err.message}`, { duration: 10000 });
+      return;
+    }
+    const res = data as OrderSyncResult;
+    setOrders((rows) => rows?.map((o) => (o.id === id ? { ...o, pos_receipt_no: res.receipt_no } : o)) ?? rows);
+    if (res.already) return;
+    const { shortages, low, lines } = summariseUsage(res.usage);
+    if (shortages.length) {
+      toast.error("Not enough stock for this order", {
+        description: shortages.join("\n"),
+        duration: Infinity,
+        closeButton: true,
+      });
+    }
+    if (low.length) toast.warning("Running low", { description: low.join("\n"), duration: 15000 });
+    if (res.no_recipe.length) {
+      toast.warning("No recipe set — nothing deducted for:", {
+        description: res.no_recipe.join(", "),
+        duration: 15000,
+      });
+    }
+    toast.success(`Recorded as POS sale ${res.receipt_no}`, {
+      description: lines.length ? lines.join("\n") : "No stock was used.",
+      duration: 15000,
+      closeButton: true,
+    });
   }
 
   return (
@@ -105,6 +139,11 @@ function AdminOrdersPage() {
                 >
                   {paymentLabel(o)}
                 </span>
+                {o.pos_receipt_no && (
+                  <span className="label-caps rounded-full border border-gold px-3 py-1 text-[11px]">
+                    Stock deducted · {o.pos_receipt_no}
+                  </span>
+                )}
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 Placed {formatOrderDate(o.created_at)}

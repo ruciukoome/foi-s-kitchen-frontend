@@ -28,6 +28,7 @@ export type OrderRow = {
   payment_method?: string | null;
   payment_reference?: string | null;
   paid_at?: string | null;
+  pos_receipt_no?: string | null;
 };
 
 /** Plain-language label for how (and whether) an order was paid. */
